@@ -13,10 +13,24 @@ Using inspiration from
 
 
 """
+import logging
+
 from struct import pack
+
+
+def get_log(e=None):
+    return logging.getLogger("{0}.{1}".format(__name__, e) if e else __name__)
 
 
 def parse(lines):
     """
     """
+    log = get_log('parse')
+
+    # The first 43 bytes should be:
+    #
+    #   b'reMarkable lines with selections and layers'
+    #
+    header_line = lines[:43]
+
     raise ValueError("*beep*")
