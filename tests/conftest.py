@@ -31,6 +31,6 @@ def example_lines_file(request):
     lines_file = os.path.join(
         tests_dir, u'examples/aa90b0e7-5c1a-42fe-930f-dad9cf3363cc.lines'
     )
-    with open(lines_file, 'rb') as fd:
+    with open(lines_file, 'rb', buffering=0) as fd:
         raw_binary = fd.read()
     return raw_binary
