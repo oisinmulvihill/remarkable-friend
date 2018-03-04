@@ -17,27 +17,110 @@ import io
 import struct
 
 
-binary_format = [
-    {"name": "header", "bytes": 43},
-    {"name": "pages", "bytes": 4},
-]
-
-
-def read_int32_t(stream):
-    return int.from_bytes(stream.read(4), byteorder='little')
-
-def read_int32_t(stream):
-    return int.from_bytes(stream.read(4), byteorder='little')
-
-
-def parse(lines):
+class Base(object):
     """
     """
-    fd = io.BytesIO(lines)
-    #header = fd.read(43).decode('ascii')
+    def unpack(self, fmt, raw_bytes):
+        """
+        """
+        fmt_size = struct.calcsize(fmt)
 
-    expected = b'reMarkable lines with selections and layers'
-    header, pages = struct.unpack_from('<{}sI'.format(len(expected)), lines)
+        data = struct.unpack_from(self.fmt, raw_bytes)
+
+        return (data, fmt_size)
+
+
+class Points(Base):
+    """
+    """
+    fmt = '<I'
+
+    def __init__(self):
+        """
+        """
+        self.lines = []
+
+
+class Segments(Base):
+    """
+    """
+    fmt = '<I'
+
+    def __init__(self):
+        """
+        """
+        self.lines = []
+
+
+class Lines(Base):
+    """
+    """
+    fmt = '<I'
+
+    def __init__(self):
+        """
+        """
+        self.lines = []
+
+
+class Layer(Base):
+    """
+    """
+    fmt = '<I'
+
+    def __init__(self):
+        """
+        """
+        self.lines = []
+
+
+class Page(Base):
+    """
+    """
+    fmt = '<I'
+
+    def __init__(self, raw_bytes, offset):
+        """
+        """
+        self.raw_bytes = raw_bytes
+
+        self.layers = []
+
+        self.layer_count =
+
+        for layer in range(layers):
+            print("Layer Number: {}".format(layer))
+            lines = read_int32_t(fd)
+            print("Number of lines: {}".format(lines))
+
+
+class Notebook(Base):
+    """
+    """
+    EXPECTED_HEADER = b'reMarkable lines with selections and layers'
+
+    fmt = '<43s'
+
+    def __init__(self, raw_bytes):
+        """
+        """
+        self.header, size = self.unpack(self.fmt, raw_bytes)
+        self.header = self.header.decode('ascii')
+
+        self.page_count = unpack('<I', raw_bytes[offset:])
+
+        self.pages = []
+
+        for page in range(pages):
+            print("Page Number: {}".format(page))
+
+
+def parse(raw_bytes):
+    """
+    """
+
+    offset = struct.calcsize('<43s')
+
 
     # pages = struct.iter_unpack('<I', fd)
 
@@ -47,15 +130,7 @@ def parse(lines):
 
     return
 
-    for page in range(pages):
-        print("Page Number: {}".format(page))
-        layers = read_int32_t(fd)
-        print("Number of layers: {}".format(layers))
 
-        for layer in range(layers):
-            print("Layer Number: {}".format(layer))
-            lines = read_int32_t(fd)
-            print("Number of lines: {}".format(lines))
 
             for line in range(lines):
                 brush_type = read_int32_t(fd)
