@@ -13,10 +13,45 @@ Using inspiration from
 
 
 """
-from struct import pack
+import io
+
+binary_format = [
+    {"name": "header", "bytes": 43},
+    {"name": "pages", "bytes": 4},
+]
+
+
+def read_int32_t(stream):
+    return int.from_bytes(stream.read(4), byteorder='little')
 
 
 def parse(lines):
     """
     """
+    fd = io.BytesIO(lines)
+
+    header = fd.read(43).decode('ascii')
+
+    pages = read_int32_t(fd)
+
+    print("header: {}\npages: {}".format(header, pages))
+
+    for page in range(pages):
+        print("Page Number: {}".format(page))
+        layers = read_int32_t(fd)
+        print("Number of layers: {}".format(layers))
+
+        for layer in range(layers):
+            print("Layer Number: {}".format(layer))
+            lines = read_int32_t(fd)
+            print("Number of lines: {}".format(lines))
+
+            for line in range(lines):
+                brush_type = read_int32_t(fd)
+                colour = read_int32_t(fd)
+                unknown = read_int32_t(fd)
+                unknown = read_int32_t(fd)
+                print("line Number: {}".format(line))
+
+
     raise ValueError("*beep*")
