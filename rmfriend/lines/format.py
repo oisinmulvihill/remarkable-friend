@@ -79,7 +79,12 @@ class Page(Base):
     """
     fmt = '<I'
 
-    def __init__(self, raw_bytes, offset):
+    @classmethod
+    def parse(cls, raw_bytes, offset):
+        """
+        """
+
+    def __init__(self, layers):
         """
         """
         self.raw_bytes = raw_bytes
@@ -101,18 +106,25 @@ class Notebook(Base):
 
     fmt = '<43s'
 
-    def __init__(self, raw_bytes):
+    @classmethod
+    def parse(cls, raw_bytes):
         """
         """
         self.header, size = self.unpack(self.fmt, raw_bytes)
         self.header = self.header.decode('ascii')
-
-        self.page_count = unpack('<I', raw_bytes[offset:])
-
-        self.pages = []
-
+        pages, size = self.unpack(Page.fmt, raw_bytes, offset=size)
         for page in range(pages):
-            print("Page Number: {}".format(page))
+            self.unpack(self.fmt, raw_bytes)
+
+
+    def __init__(self, header, pages):
+        """
+        """
+        self.header = header
+        self.pages = []
+        self.page_lookup = {}
+        for page in range(pages):
+            self.page_lookup[page] = Page()
 
 
 def parse(raw_bytes):
