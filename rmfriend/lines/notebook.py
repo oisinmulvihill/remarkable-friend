@@ -1,16 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-
-I'm inspired by the hard work of the following projects which worked out the
-format.
-
- - https://github.com/reHackable/maxio
-
- - https://github.com/ax3l/lines-are-beautiful
-
- - https://plasma.ninja/blog/devices/remarkable/binary/format/2017/12/26/
-    reMarkable-lines-file-format.html
-
 """
 from rmfriend.lines.base import Base
 from rmfriend.lines.pages import Pages
