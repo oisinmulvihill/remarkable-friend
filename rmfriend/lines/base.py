@@ -16,10 +16,10 @@ def recover(raw_bytes, class_=None, offset=0):
             data = struct.unpack_from(class_.fmt, raw_bytes, offset=offset)
             data = data[0]
             offset += size
-            print(
-                "position:{} fmt:{} offset:{} size:{} data:{}".
-                format(class_.__name__, class_.fmt, offset, size, data)
-            )
+            # print(
+            #     "position:{} fmt:{} offset:{} size:{} data:{}".
+            #     format(class_.__name__, class_.fmt, offset, size, data)
+            # )
 
         # get the next format to read:
         class_ = (yield data)
