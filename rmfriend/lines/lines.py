@@ -74,7 +74,7 @@ class Points(Int32):
 
 
 class BrushBaseSize(Float):
-    """Don't know what this is used for.
+    """
     """
     def __init__(self, value):
         """

@@ -12,8 +12,8 @@ def test_file_header_parsing(logger):
     """
     """
     expected = 'reMarkable lines with selections and layers'
+    raw_bytes = struct.pack('<43s', expected.encode('ascii'))
 
-    raw_bytes = struct.pack('<43s', expected)
     position = recover(raw_bytes)
     next(position)
 
