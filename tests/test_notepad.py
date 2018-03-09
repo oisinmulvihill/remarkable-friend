@@ -22,9 +22,9 @@ def test_file_header_parsing(logger):
     assert file_header.header == expected
 
 
-def test_format_parsing(logger, example_lines_file):
-    """
-    """
-    notebook = Notebook.parse(example_lines_file)
+# def test_format_parsing(logger, example_lines_file):
+#     """
+#     """
+#     notebook = Notebook.parse(example_lines_file)
 
-    assert notebook.pages.count == 1
+#     assert notebook.pages.count == 1
