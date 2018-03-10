@@ -45,6 +45,9 @@ $ pipenv run rmfriend notebook_to_svg tests/examples/b8c0aaa8-decb-4d39-9218-b66
 
 2018-03-10 15:23:05,198 do_notebook_to_svg rmfriend.tools.admincommands.do_notebook_to_svg DEBUG tests/examples/b8c0aaa8-decb-4d39-9218-b66a7418aef9.lines has '1' pages.
 
+$ls *.svg
+out-00.svg
+
 $
 
 ```
