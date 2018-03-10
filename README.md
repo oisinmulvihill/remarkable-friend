@@ -25,7 +25,34 @@ the reMarkable lines file format.
 
 ## Environment
 
-pipenv install
+make install
+
+
+## Usage
+
+
+### Convert a Notebook to SVG
+
+I've produced a very basic converter takes the path to a transferred notebook
+and the base output file name. Each page will be converted to its own SVG
+drawing. My goal here is to produce a preview I can later use when moving
+
+```
+
+$ pipenv run rmfriend notebook_to_svg tests/examples/b8c0aaa8-decb-4d39-9218-b66a7418aef9.lines  out
+2018-03-10 15:23:05,184 do_notebook_to_svg rmfriend.tools.admincommands.do_notebook_to_svg DEBUG Reading file 'tests/examples/b8c0aaa8-decb-4d39-9218-b66a7418aef9.lines'
+2018-03-10 15:23:05,184 do_notebook_to_svg rmfriend.tools.admincommands.do_notebook_to_svg DEBUG Parsing file 'tests/examples/b8c0aaa8-decb-4d39-9218-b66a7418aef9.lines'
+
+2018-03-10 15:23:05,198 do_notebook_to_svg rmfriend.tools.admincommands.do_notebook_to_svg DEBUG tests/examples/b8c0aaa8-decb-4d39-9218-b66a7418aef9.lines has '1' pages.
+
+$
+
+```
+
+### Convert a Notebook to PNG
+
+Comming soon.
+
 
 ## running tests
 
