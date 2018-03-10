@@ -1,18 +1,10 @@
 # -*- coding: utf-8 -*-
 """
 """
-from itertools import zip_longest
-
 import svgwrite
 
 from rmfriend.export.base import Base
-
-
-def grouper(iterable, n, fillvalue=None):
-    "Collect data into fixed-length chunks or blocks"
-    # grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx"
-    args = [iter(iterable)] * n
-    return zip_longest(*args, fillvalue=fillvalue)
+from rmfriend.export.base import grouper
 
 
 class Export(Base):
@@ -59,6 +51,6 @@ class Export(Base):
                         dwg.add(dwg.polyline(line_points, **extra))
                         last_point = end_point
 
-            drawings.append(dwg)
+            drawings.append({'filename': file_name, 'image': dwg})
 
         return drawings

@@ -13,10 +13,7 @@ def main():
     """
     log = logging.getLogger()
     formatter = logging.Formatter(
-        (
-            '%(asctime)s %(funcName)s %(name)s %(levelname)s '
-            '%(message)s'
-        )
+        '%(asctime)s %(funcName)s %(levelname)s %(message)s'
     )
     hdlr = logging.StreamHandler()
     hdlr.setFormatter(formatter)
