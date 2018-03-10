@@ -25,7 +25,7 @@ class Export(Base):
             image = Image.new(
                 'RGBA',
                 (cls.DEFAULT_WIDTH, cls.DEFAULT_HEIGHT),
-                (0, 255, 0, 0)
+                (255, 255, 255, 255)
             )
             draw = ImageDraw.Draw(image)
 
@@ -37,13 +37,13 @@ class Export(Base):
                             # end of data
                             continue
 
-                        draw.line([p1.x_y, p2.x_y], fill=cls.BLACK)
-
-                        end_point = p2
                         if last_point is not None:
                             # Connect this to the last line to avoid gaps.
-                            pass
-                        last_point = end_point
+                            draw.line([last_point.x_y, p2.x_y], fill=cls.BLACK)
+
+                        draw.line([p1.x_y, p2.x_y], fill=cls.BLACK)
+
+                        last_point = p2
 
             drawings.append({'filename': file_name, 'image': image})
 
