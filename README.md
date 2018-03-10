@@ -54,9 +54,7 @@ $
 ### Convert a Notebook to PNG
 
 
-I've produced a very basic converter takes the path to a transferred notebook
-and the base output file name. Each page will be converted to its own SVG
-drawing. My goal here is to produce a preview I can later use when moving
+This is a very rudimentary converter from SVG to PNG. I haven't yet figured out connecting up the segments in the conversion so its a work in progress.
 
 ```
 
