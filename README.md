@@ -53,7 +53,6 @@ $
 
 ### Convert a Notebook to PNG
 
-
 This is a very rudimentary converter from SVG to PNG. I haven't yet figured out connecting up the segments in the conversion so its a work in progress.
 
 ```
