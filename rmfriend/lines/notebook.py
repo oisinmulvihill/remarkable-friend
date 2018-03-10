@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 """
+import os
+
 from rmfriend.lines.base import Base
 from rmfriend.lines.pages import Pages
 from rmfriend.lines.base import recover
@@ -27,6 +29,18 @@ class Notebook(Base):
         """
         self.file_header = header
         self.pages = pages
+
+    @classmethod
+    def read(cls, filename):
+        """
+        """
+        filename = os.path.expanduser(filename)
+        filename = os.path.abspath(filename)
+
+        with open(filename, 'rb') as fd:
+            raw_binary = fd.read()
+
+        return raw_binary
 
     @classmethod
     def parse(cls, raw_bytes):

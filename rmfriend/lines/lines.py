@@ -54,6 +54,26 @@ class Point(Float):
 
         return Point(x, y, pressure, rot_x, rot_y)
 
+    @property
+    def x_y(self):
+        """Return a tuple of the (x, y) for convience."""
+        return (self.x, self.y)
+
+    def __str__(self):
+        return u"{}: pressure={} rot_x={} rot_y={}".format(
+            self.x_y, self.pressure, self.rot_x, self.rot_y
+        )
+
+    def __repr__(self):
+        return str({
+            "name": "Point",
+            "x": self.x,
+            "y": self.y,
+            "pressure": self.pressure,
+            "rot_x": self.rot_x,
+            "rot_y": self.rot_y,
+        })
+
 
 class Points(Int32):
     """
@@ -175,6 +195,14 @@ class Line(Int32):
         points = Points.parse(position)
         return Line(
             brush_type, colour, line_attribute1, brush_base_size, points
+        )
+
+    def __str__(self):
+        return u"brush={} colour={} base_size={} points={}".format(
+            self.brush_type.name,
+            self.colour.name,
+            self.brush_base_size.name,
+            self.points.count,
         )
 
 
