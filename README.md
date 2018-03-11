@@ -80,7 +80,7 @@ $
 ```
 
 The out-00.svg should look like:
-![alt text](https://github.com/oisinmulvihill/remarkable-friend/raw/master/out-00.svg "out-00.svg")
+![out-00.svg](https://github.com/oisinmulvihill/remarkable-friend/raw/master/out-00.svg "out-00.svg")
 
 
 ### Convert a Notebook to PNG
@@ -104,4 +104,4 @@ out-00.png
 ```
 
 The out-00.png should look like:
-![alt text](https://github.com/oisinmulvihill/remarkable-friend/raw/master/out-00.png "out-00.png")
+![out-00.png](https://github.com/oisinmulvihill/remarkable-friend/raw/master/out-00.png "out-00.png")
