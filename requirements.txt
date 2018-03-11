@@ -1,0 +1,8 @@
+cmdln==2.0.0
+ipdb==0.11
+mock==2.0.0
+Pillow==5.0.0
+pyobjc==4.1
+pywebview==1.8
+svgwrite==1.1.12
+

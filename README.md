@@ -24,8 +24,22 @@ the reMarkable lines file format.
 
 ## Environment
 
+
+Create the rmfriend virtualenv. In my case I do this with virtualenvwrapper:
+
+```bash
+
+mkvirtualenv -p python3 rmfriend
+
+```
+
+Then install the requirements and set up the rmfriend console script as follows:
+
+```bash
+
 make install
 
+```
 
 ## Usage
 
@@ -36,9 +50,9 @@ I've produced a very basic converter takes the path to a transferred notebook
 and the base output file name. Each page will be converted to its own SVG
 drawing. My goal here is to produce a preview I can later use when moving
 
-```
+```bash
 
-$pipenv run rmfriend notebook_to_svg tests/examples/b8c0aaa8-decb-4d39-9218-b66a7418aef9.lines  out
+$rmfriend notebook_to_svg tests/examples/b8c0aaa8-decb-4d39-9218-b66a7418aef9.lines  out
 2018-03-10 15:53:51,917 do_notebook_to_svg DEBUG Reading file 'tests/examples/b8c0aaa8-decb-4d39-9218-b66a7418aef9.lines'
 2018-03-10 15:53:51,918 do_notebook_to_svg DEBUG Parsing file 'tests/examples/b8c0aaa8-decb-4d39-9218-b66a7418aef9.lines'
 
@@ -54,9 +68,9 @@ $
 
 This is a very rudimentary converter from SVG to PNG. I haven't yet figured out connecting up the segments in the conversion so its a work in progress.
 
-```
+```bash
 
-$pipenv run rmfriend notebook_to_png tests/examples/b8c0aaa8-decb-4d39-9218-b66a7418aef9.lines  out
+$rmfriend notebook_to_png tests/examples/b8c0aaa8-decb-4d39-9218-b66a7418aef9.lines  out
 2018-03-10 15:53:26,660 do_notebook_to_png DEBUG Reading file 'tests/examples/b8c0aaa8-decb-4d39-9218-b66a7418aef9.lines'
 2018-03-10 15:53:26,661 do_notebook_to_png DEBUG Parsing file 'tests/examples/b8c0aaa8-decb-4d39-9218-b66a7418aef9.lines'
 

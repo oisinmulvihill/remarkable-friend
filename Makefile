@@ -1,10 +1,10 @@
 
 test_install:
-	pipenv run pip install -r test-requirements.txt
+	pip install -r test-requirements.txt
 
 test: test_install
-	pipenv run pytest --cov=rmfriend
+	pytest --cov=rmfriend
 
 install:
-	pipenv install
-	pipenv run python setup.py develop
+	pip install -r requirements.txt
+	python setup.py develop
