@@ -85,7 +85,8 @@ The out-00.svg should look like:
 
 ### Convert a Notebook to PNG
 
-This is a very rudimentary converter from SVG to PNG.
+This is a very rudimentary converter from lines format to PNG. It works but
+needs a lot more work.
 
 ```bash
 
