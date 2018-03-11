@@ -89,3 +89,34 @@ class AdminCommands(cmdln.Cmdln):
                 file_['image'].save(fd, "PNG")
 
         sys.exit(return_code)
+
+    def do_notebook_ls(self, subcmd, opts, *args, **kwargs):
+        """${cmd_name}: Show a list of notebooks on reMarkable.
+
+        ${cmd_usage}
+        ${cmd_option_list}
+
+        """
+        import paramiko
+
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        try:
+            # password='t3st@#test123'
+            ssh.connect(
+                '10.0.0.12', username='root'
+            )
+        except paramiko.SSHException:
+            print("Connection Error")
+        sftp = ssh.open_sftp()
+        sftp.chdir("/home/root/.local/share/remarkable/xochitl")
+        for file_ in sftp.listdir_iter():
+            if file_.filename.endswith('.metadata'):
+                print(file_.filename)
+                import io
+                fd = io.BytesIO(b'')
+                sftp.getfo(file_.filename, fd)
+                import json
+                print(fd)
+
+        ssh.close()
