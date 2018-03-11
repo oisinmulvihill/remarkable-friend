@@ -87,6 +87,8 @@ out-00.png
 
 ```
 
+![alt text](https://github.com/oisinmulvihill/remarkable-friend/raw/master/out-00.png "out-00.png")
+
 
 ## running tests
 
