@@ -37,6 +37,9 @@ Then install the requirements and set up the rmfriend console script as follows:
 
 ```bash
 
+# activate the virtualenv. In my case:
+workon rmfriend
+
 make install
 
 ```
