@@ -90,4 +90,10 @@ out-00.png
 
 ## running tests
 
-pipenv run pytest -s --pdb
+Once the environment is activated and set up you can run all the tests as follows:
+
+```bash
+
+make test
+
+```
