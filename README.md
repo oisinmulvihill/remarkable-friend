@@ -44,6 +44,18 @@ make install
 
 ```
 
+
+## running tests
+
+Once the environment is activated and set up you can run all the tests as follows:
+
+```bash
+
+make test
+
+```
+
+
 ## Usage
 
 
@@ -89,14 +101,3 @@ out-00.png
 
 The out-00.png should look like:
 ![alt text](https://github.com/oisinmulvihill/remarkable-friend/raw/master/out-00.png "out-00.png")
-
-
-## running tests
-
-Once the environment is activated and set up you can run all the tests as follows:
-
-```bash
-
-make test
-
-```
