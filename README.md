@@ -87,6 +87,7 @@ out-00.png
 
 ```
 
+The out-00.png should look like:
 ![alt text](https://github.com/oisinmulvihill/remarkable-friend/raw/master/out-00.png "out-00.png")
 
 
