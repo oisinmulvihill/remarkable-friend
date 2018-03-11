@@ -79,9 +79,13 @@ $
 
 ```
 
+The out-00.svg should look like:
+![alt text](https://github.com/oisinmulvihill/remarkable-friend/raw/master/out-00.svg "out-00.svg")
+
+
 ### Convert a Notebook to PNG
 
-This is a very rudimentary converter from SVG to PNG. I haven't yet figured out connecting up the segments in the conversion so its a work in progress.
+This is a very rudimentary converter from SVG to PNG.
 
 ```bash
 
