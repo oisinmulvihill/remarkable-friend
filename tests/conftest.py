@@ -34,3 +34,16 @@ def example_lines_file(request):
     with open(lines_file, 'rb') as fd:
         raw_binary = fd.read()
     return raw_binary
+
+
+@pytest.fixture(scope='function')
+def sftp_listing(request):
+    """
+    """
+    tests_dir = os.path.split(__file__)[0]
+    lines_file = os.path.join(
+        tests_dir, u'examples/sftp_listing.txt'
+    )
+    with open(lines_file, 'r') as fd:
+        sftp_listing = fd.readlines()
+    return sftp_listing

@@ -18,7 +18,7 @@ def main():
     hdlr = logging.StreamHandler()
     hdlr.setFormatter(formatter)
     log.addHandler(hdlr)
-    log.setLevel(logging.DEBUG)
+    log.setLevel(logging.INFO)
     log.propagate = True
 
     while True:

@@ -8,10 +8,11 @@ Oisin Mulvihill
 
 """
 import sys
+import getpass
 import logging
 
 import cmdln
-
+from rmfriend.tools.sftp import SFTP
 from rmfriend.lines.notebook import Notebook
 
 
@@ -90,6 +91,30 @@ class AdminCommands(cmdln.Cmdln):
 
         sys.exit(return_code)
 
+    @cmdln.alias("ls")
+    @cmdln.option(
+        "-i", "--show-id", action="store_true", dest="show_id", default=False,
+        help="Show the document ID in the listing."
+    )
+    @cmdln.option(
+        "-a", "--address", action="store", dest="address",
+        default='10.11.99.1',
+        help="The address to connect to. The default is %default"
+    )
+    @cmdln.option(
+        "-u", "--username", action="store", dest="username",
+        default='root',
+        help="The username to use. The default is %default"
+    )
+    @cmdln.option(
+        "--password", action="store", dest="password",
+        default=None,
+        help="The password to use when connecting."
+    )
+    @cmdln.option(
+        "-p", action="store_true", dest="ask", default=False,
+        help="Ask for password to be entered."
+    )
     def do_notebook_ls(self, subcmd, opts, *args, **kwargs):
         """${cmd_name}: Show a list of notebooks on reMarkable.
 
@@ -97,26 +122,19 @@ class AdminCommands(cmdln.Cmdln):
         ${cmd_option_list}
 
         """
-        import paramiko
-
-        ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        try:
-            # password='t3st@#test123'
-            ssh.connect(
-                '10.0.0.12', username='root'
+        if opts.ask:
+            password = getpass.getpass(
+                "Please enter password for {}@{}: ".
+                format(opts.username, opts.address)
             )
-        except paramiko.SSHException:
-            print("Connection Error")
-        sftp = ssh.open_sftp()
-        sftp.chdir("/home/root/.local/share/remarkable/xochitl")
-        for file_ in sftp.listdir_iter():
-            if file_.filename.endswith('.metadata'):
-                print(file_.filename)
-                import io
-                fd = io.BytesIO(b'')
-                sftp.getfo(file_.filename, fd)
-                import json
-                print(fd)
+        else:
+            password = opts.password
 
-        ssh.close()
+        auth = dict(
+            hostname=opts.address,
+            username=opts.username,
+            password=password,
+        )
+        with SFTP.connect(**auth) as sftp:
+            results = SFTP.notebooks_from_listing(sftp.listdir())
+            SFTP.notebook_ls(sftp, results, show_id=opts.show_id)
