@@ -4,7 +4,7 @@ This aims to allow the manipulation reMarkable notebooks on a desktop machine.
 
 My first goal is to be able to copy pages from one notebook to another.
 
-I'm successfully parsed the notebooks and can now convert the binary format
+I've successfully parsed the notebooks and can now convert the binary format
 into SVG or PNG images. I haven't yet written the format back to disk. This
 would open the possiblity of generating lines files.
 
