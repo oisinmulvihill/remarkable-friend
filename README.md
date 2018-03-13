@@ -6,7 +6,7 @@ My first goal is to be able to copy pages from one notebook to another.
 
 I'm successfully parsed the notebooks and can now convert the binary format
 into SVG or PNG images. I haven't yet written the format back to disk. This
-would opens the possiblity to generate lines files.
+would opens the possiblity of generating lines files.
 
 I'm work on getting a listing of files from the device. You can now see a
 human friendly listing of notebooks. Next will be working on transferring and
