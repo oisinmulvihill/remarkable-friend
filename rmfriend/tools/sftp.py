@@ -9,7 +9,6 @@ import collections
 from contextlib import contextmanager
 
 import paramiko
-from terminaltables import AsciiTable
 
 
 def get_log(e=None):
@@ -120,24 +119,32 @@ class SFTP(object):
         return fd.read()
 
     @classmethod
-    def notebook_ls(cls, sftp, notebooks, show_id=False):
+    def notebook_ls(cls, sftp, notebooks):
         """Recover the metadata and print a listing of the notebooks.
 
         :param sftp: See connect() for details.
 
         :param notebooks: See notebooks_from_listing().
 
-        :param show_id: False or True
+        :returns: A list of notebook information or an empty list.
 
-        If this is True the notebook's UUID will be displayed. This will be
-        hidden by default.
+        E.g.::
+
+            [
+                {
+                    'id': 'UUID',
+                    'name': 'notebook name',
+                    'last_modified': 'iso8601 formatted string'
+                },
+                :
+                etc
+            ]
+
+        This only contains the information and not the actual notebook lines
+        data.
 
         """
-        listing = [
-            ['Last Modified', 'Name']
-        ]
-        if show_id:
-            listing[0].insert(0, 'ID')
+        listing = []
 
         for document_id in notebooks:
             # for extension in ('metadata', 'content'):
@@ -152,12 +159,10 @@ class SFTP(object):
             last_modified = time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.gmtime(last_modified)
             )
-            name = metadata['visibleName']
-            if show_id:
-                listing.append((document_id, last_modified, name))
-            else:
-                listing.append((last_modified, name))
+            listing.append({
+                'id': document_id,
+                'last_modified': last_modified,
+                'name': metadata['visibleName']
+            })
 
-        # print("\n\n{}\n".format(notebooks))
-        table = AsciiTable(listing)
-        print(table.table)
+        return listing

@@ -12,6 +12,8 @@ import getpass
 import logging
 
 import cmdln
+from terminaltables import AsciiTable
+
 from rmfriend.tools.sftp import SFTP
 from rmfriend.lines.notebook import Notebook
 
@@ -137,4 +139,23 @@ class AdminCommands(cmdln.Cmdln):
         )
         with SFTP.connect(**auth) as sftp:
             results = SFTP.notebooks_from_listing(sftp.listdir())
-            SFTP.notebook_ls(sftp, results, show_id=opts.show_id)
+            listing = SFTP.notebook_ls(sftp, results)
+
+        table_listing = [
+            ['Last Modified', 'Name']
+        ]
+        if opts.show_id:
+            table_listing[0].insert(0, 'ID')
+
+        for e in listing:
+            if opts.show_id:
+                table_listing.append((
+                    e['document_id'], e['last_modified'], e['name'])
+                )
+            else:
+                table_listing.append((
+                    e['last_modified'], e['name'])
+                )
+
+        table = AsciiTable(table_listing)
+        print(table.table)
