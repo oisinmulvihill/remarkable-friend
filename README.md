@@ -2,6 +2,8 @@
 
 This aims to allow the manipulation reMarkable notebooks on a desktop machine.
 
+![listing notebooks](https://github.com/oisinmulvihill/remarkable-friend/raw/master/image/listing-notebooks.gif "listing-notebooks.gif")
+
 For the GUI and MacOSX app see the frontend repository:
 
  - https://github.com/oisinmulvihill/remarkable-friend-ui
@@ -118,9 +120,6 @@ oisin@tarsis [remarkable-friend]
 $
 
 ```
-
-The out-00.svg should look like:
-![out-00.svg](https://github.com/oisinmulvihill/remarkable-friend/raw/master/out-00.svg "out-00.svg")
 
 
 ### Convert a Notebook to PNG
