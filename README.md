@@ -2,7 +2,7 @@
 
 This aims to allow the manipulation reMarkable notebooks on a desktop machine.
 
-![listing notebooks](https://github.com/oisinmulvihill/remarkable-friend/raw/master/image/listing-notebooks.gif "listing-notebooks.gif")
+![listing notebooks](https://github.com/oisinmulvihill/rmfriend-releases/raw/master/image/listing-notebooks.gif "listing-notebooks.gif")
 
 For the GUI and MacOSX app see the frontend repository:
 
