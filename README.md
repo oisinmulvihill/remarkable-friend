@@ -2,6 +2,10 @@
 
 This aims to allow the manipulation reMarkable notebooks on a desktop machine.
 
+For the GUI and MacOSX app see the frontend repository:
+
+ - https://github.com/oisinmulvihill/remarkable-friend-ui
+
 My first goal is to be able to copy pages from one notebook to another.
 Currently I'm working on the parsing of the file into an intermediate
 structure to aid manipulation. Once complete I should be able to write the

@@ -111,7 +111,8 @@ class AdminCommands(cmdln.Cmdln):
         sftp = ssh.open_sftp()
         sftp.chdir("/home/root/.local/share/remarkable/xochitl")
         for file_ in sftp.listdir_iter():
-            if file_.filename.endswith('.metadata'):
+            filename, extension = file_.split('.')
+            if extension.endswith('metadata'):
                 print(file_.filename)
                 import io
                 fd = io.BytesIO(b'')
