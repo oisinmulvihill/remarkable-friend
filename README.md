@@ -7,13 +7,15 @@ For the GUI and MacOSX app see the frontend repository:
  - https://github.com/oisinmulvihill/remarkable-friend-ui
 
 My first goal is to be able to copy pages from one notebook to another.
-Currently I'm working on the parsing of the file into an intermediate
-structure to aid manipulation. Once complete I should be able to write the
-format back to disk. This opens the possiblity to generate lines files.
 
-I aim later to be able to write SVG/PNG files from the parsed input. However
-I'd also like to be able to convert SVG files into lines formatted files. This
-should be possible soon.
+I've successfully parsed the notebooks and can now convert the binary format
+into SVG or PNG images. I haven't yet written the format back to disk. This
+would open the possiblity of generating lines files.
+
+I'm work on getting a listing of files from the device. You can now see a
+human friendly listing of notebooks. Next will be working on transferring and
+caching notebooks. Then generating page previews to aid manipulation of the
+notebooks.
 
 I've been inspired by the hard work of the following projects which worked-out
 the reMarkable lines file format.
@@ -25,6 +27,10 @@ the reMarkable lines file format.
  - https://plasma.ninja/blog/devices/remarkable/binary/format/2017/12/26/reMarkable-lines-file-format.html
 
 # Development
+
+I'm currently developing on MacOSX using Python 3 installed from home brew. I
+aim to produce stand alone program you can download for Mac, Linux and Windows
+but thats a while a way yet.
 
 ## Environment
 
@@ -61,6 +67,36 @@ make test
 
 
 ## Usage
+
+
+### List notebooks from the command line
+
+Using -p/--password will ask for the password to be entered in a secure way. You
+can use -a/--address to change where to connect. To see the raw document UUID
+you can add --show-id.
+
+```bash
+
+$rmfriend ls --password
+Please enter password for root@10.99.11.1:
+2018-03-13 21:34:11,796 connect INFO Connecting to device hostname '10.99.11.1' username 'root'
+2018-03-13 21:34:12,443 connect INFO Connected to device '10.99.11.1' changing to remote path '/home/root/.local/share/remarkable/xochitl'
++---------------------+-------------------------------------+
+| Last Modified       | Name                                |
++---------------------+-------------------------------------+
+| 2018-02-13 21:17:50 | Tech Dinner                         |
+| 2018-03-07 11:02:43 | Dev Process                         |
+:
+etc
+:
+| 2018-02-20 17:15:45 | Notes From "The Managers Path"      |
+| 2018-03-08 09:22:56 | ForStandUp                          |
+|---------------------+-------------------------------------+
+2018-03-13 21:34:13,094 connect INFO Connection to device '10.0.0.12' closed.
+
+$
+
+```
 
 
 ### Convert a Notebook to SVG
