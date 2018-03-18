@@ -94,7 +94,7 @@ etc
 | 2018-02-20 17:15:45 | Notes From "The Managers Path"      |
 | 2018-03-08 09:22:56 | ForStandUp                          |
 |---------------------+-------------------------------------+
-2018-03-13 21:34:13,094 connect INFO Connection to device '10.0.0.12' closed.
+2018-03-13 21:34:13,094 connect INFO Connection to device '10.99.11.1' closed.
 
 $
 
