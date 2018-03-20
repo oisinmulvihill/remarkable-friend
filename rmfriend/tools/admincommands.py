@@ -14,6 +14,7 @@ import logging
 import cmdln
 from terminaltables import AsciiTable
 
+from rmfriend import userconfig
 from rmfriend.tools.sftp import SFTP
 from rmfriend.lines.notebook import Notebook
 
@@ -99,16 +100,6 @@ class AdminCommands(cmdln.Cmdln):
         help="Show the document ID in the listing."
     )
     @cmdln.option(
-        "-a", "--address", action="store", dest="address",
-        default='10.11.99.1',
-        help="The address to connect to. The default is %default"
-    )
-    @cmdln.option(
-        "-u", "--username", action="store", dest="username",
-        default='root',
-        help="The username to use. The default is %default"
-    )
-    @cmdln.option(
         "--password", action="store", dest="password",
         default=None,
         help="The password to use when connecting."
@@ -124,17 +115,20 @@ class AdminCommands(cmdln.Cmdln):
         ${cmd_option_list}
 
         """
+        config = userconfig.recover_or_create()
+        address = config['rmfriend']['address']
+        username = config['rmfriend']['username']
+
         if opts.ask:
             password = getpass.getpass(
-                "Please enter password for {}@{}: ".
-                format(opts.username, opts.address)
+                "Please enter password for {}@{}: ".format(username, address)
             )
         else:
             password = opts.password
 
         auth = dict(
-            hostname=opts.address,
-            username=opts.username,
+            hostname=config['rmfriend']['address'],
+            username=config['rmfriend']['username'],
             password=password,
         )
         with SFTP.connect(**auth) as sftp:
@@ -150,7 +144,7 @@ class AdminCommands(cmdln.Cmdln):
         for e in listing:
             if opts.show_id:
                 table_listing.append((
-                    e['document_id'], e['last_modified'], e['name'])
+                    e['id'], e['last_modified'], e['name'])
                 )
             else:
                 table_listing.append((
