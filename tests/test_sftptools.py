@@ -7,9 +7,12 @@ from rmfriend.tools.sftp import SFTP
 
 
 def test_raw_listing_to_notebook_listing(logger, sftp_listing):
-    """
-    """
+    """Verify how the notebook detection is done.
 
+    Not a great test, more a place holder to come back to. It doesn't always
+    just show only notebooks.
+
+    """
     results = SFTP.notebooks_from_listing(sftp_listing)
     # There are 7 notebooks in the fixture listing. The non-notebooks should
     # be ignored in the output.

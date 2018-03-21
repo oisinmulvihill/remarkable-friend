@@ -10,6 +10,8 @@ from contextlib import contextmanager
 
 import paramiko
 
+from rmfriend.utils import document_id_and_extension
+
 
 def get_log(e=None):
     return logging.getLogger("{0}.{1}".format(__name__, e) if e else __name__)
@@ -34,6 +36,7 @@ class SFTP(object):
                     'content': {},
                     'lines': {},
                     'pagedata': {},
+                    'cache': {},
                 },
                 :
                 etc
@@ -43,13 +46,10 @@ class SFTP(object):
         results = collections.defaultdict(dict)
 
         for entry in dir_listing:
-            file_name_parts = entry.split('.')
-            document_id = file_name_parts[0].strip()
-            if len(file_name_parts) > 1:
-                extension = file_name_parts[-1].strip()
-
+            document_id, extension = document_id_and_extension(entry)
             found = results[document_id]
-            found[extension] = {}
+            if extension:
+                found[extension] = {}
             results[document_id] = found
 
         # filter out anything that doesn't have the 'lines' extension as this
@@ -117,6 +117,36 @@ class SFTP(object):
         sftp.getfo(filename, fd)
         fd.seek(0)
         return fd.read()
+
+    @classmethod
+    def notebook_remote_status(cls, sftp, notebooks):
+        """Update the notebooks give with filesystem information.
+
+        :param sftp: See connect() for details.
+
+        :param notebooks: See notebooks_from_listing().
+
+        The classmethod is used to recover the current filesystem status of
+        notebooks on the device. This will update each of the entries in the
+        notebooks dict with a status dict in the form::
+
+                {
+                    'last_access': <remote st_atime>,
+                    'last_modification': <remote st_mtime>,
+                    'size': <remote st_size>,
+                }
+
+        """
+        for item in sftp.listdir_attr():
+            (document_id, extension) = document_id_and_extension(
+                item.filename
+            )
+            if document_id in notebooks:
+                notebooks[document_id][extension] = {
+                    'last_access': item.st_atime,
+                    'last_modification': item.st_mtime,
+                    'size': item.st_size,
+                }
 
     @classmethod
     def notebook_ls(cls, sftp, notebooks):

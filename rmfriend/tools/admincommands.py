@@ -7,6 +7,7 @@ Oisin Mulvihill
 2018-03-10
 
 """
+import os
 import sys
 import getpass
 import logging
@@ -16,6 +17,7 @@ from terminaltables import AsciiTable
 
 from rmfriend import userconfig
 from rmfriend.tools.sftp import SFTP
+from rmfriend.tools.sync import Sync
 from rmfriend.lines.notebook import Notebook
 
 
@@ -153,3 +155,73 @@ class AdminCommands(cmdln.Cmdln):
 
         table = AsciiTable(table_listing)
         print(table.table)
+
+    def do_sync_ls(self, subcmd, opts, *args, **kwargs):
+        """${cmd_name}: Show a list of notebooks on reMarkable.
+
+        ${cmd_usage}
+        ${cmd_option_list}
+
+        """
+        config = userconfig.recover_or_create()
+        address = config['rmfriend']['address']
+        username = config['rmfriend']['username']
+        cache_dir = config['rmfriend']['cache_dir']
+
+        auth = dict(
+            hostname=address,
+            username=username,
+        )
+        with SFTP.connect(**auth) as sftp:
+            remote_notebooks = SFTP.notebooks_from_listing(sftp.listdir())
+            SFTP.notebook_remote_status(sftp, remote_notebooks)
+
+            local_notebooks = Sync.notebooks_cache_status()
+
+            remote = set(remote_notebooks.keys())
+            local = set(local_notebooks.keys())
+
+            present_on_both = local.union(remote)
+            for doc_id in present_on_both:
+                for extension in remote_notebooks[doc_id]:
+                    if extension in (
+                        'thumbnails', 'cache', 'backup', 'highlights'
+                    ):
+                        # ignore for the moment
+                        continue
+
+                    remote_nb = remote_notebooks[doc_id][extension]
+                    local_nb = remote_notebooks[doc_id][extension]
+                    if (
+                        local_nb['last_modification'] < remote_nb['last_modification']
+                        and
+                        local_nb['size'] != remote_nb['size']
+                    ):
+                        print('Updating doc_id: {} extension: {}'.format(
+                            doc_id, extension))
+                        filename = '{}.{}'.format(doc_id, extension)
+                        local_file = os.path.join(cache_dir, filename)
+                        sftp.get(filename, localpath=local_file)
+
+            only_local = local.difference(remote)
+            print("Files only present locally: ")
+            print(only_local)
+
+            # Recover the file present on reMarkable and store them locally
+            only_remote = remote.difference(local)
+            for doc_id in only_remote:
+                for extension in remote_notebooks[doc_id]:
+                    if extension in (
+                        'thumbnails', 'cache', 'backup', 'highlights'
+                    ):
+                        # ignore for the moment
+                        continue
+
+                    print('doc_id: {} extension: {}'.format(doc_id, extension))
+                    filename = '{}.{}'.format(doc_id, extension)
+                    local_file = os.path.join(cache_dir, filename)
+                    sftp.get(filename, localpath=local_file)
+
+
+
+
