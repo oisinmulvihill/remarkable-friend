@@ -66,7 +66,8 @@ class SFTP(object):
     @contextmanager
     def connect(
         cls, hostname, username='root', password=None,
-        default_path="/home/root/.local/share/remarkable/xochitl"
+        default_path="/home/root/.local/share/remarkable/xochitl",
+        ssh_only=False
     ):
         """A context manager that sets up a connection to the device.
 
@@ -91,14 +92,23 @@ class SFTP(object):
             format(hostname, username)
         )
         ssh.connect(hostname=hostname, username=username, password=password)
-        sftp = ssh.open_sftp()
-        log.info(
-            "Connected to device '{}' changing to remote path '{}'".
-            format(hostname, default_path)
-        )
-        sftp.chdir(default_path)
-        log.debug("yielding sftp client")
-        yield sftp
+        if ssh_only:
+            log.info(
+                "Connected to device '{}' changing to remote path '{}'".
+                format(hostname, default_path)
+            )
+            log.debug("yielding ssh client")
+            yield ssh
+
+        else:
+            sftp = ssh.open_sftp()
+            log.info(
+                "Connected to device '{}' changing to remote path '{}'".
+                format(hostname, default_path)
+            )
+            sftp.chdir(default_path)
+            log.debug("yielding sftp client")
+            yield sftp
         ssh.close()
         log.info("Connection to device '{}' closed.".format(hostname))
 

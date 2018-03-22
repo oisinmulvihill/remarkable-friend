@@ -190,18 +190,30 @@ class AdminCommands(cmdln.Cmdln):
                         # ignore for the moment
                         continue
 
-                    remote_nb = remote_notebooks[doc_id][extension]
-                    local_nb = remote_notebooks[doc_id][extension]
-                    if (
-                        local_nb['last_modification'] < remote_nb['last_modification']
-                        and
-                        local_nb['size'] != remote_nb['size']
-                    ):
-                        print('Updating doc_id: {} extension: {}'.format(
-                            doc_id, extension))
+                    auth['ssh_only'] = True
+                    with SFTP.connect(**auth) as ssh:
                         filename = '{}.{}'.format(doc_id, extension)
+                        stdin, stdout, stderr = ssh.exec_command(
+                        'cd {} ; md5sum {}'.format(
+                            '/home/root/.local/share/remarkable/xochitl',
+                            filename
+                        ))
+                        print(stdout.read())
+
+                        import hashlib
+                        import binascii
                         local_file = os.path.join(cache_dir, filename)
-                        sftp.get(filename, localpath=local_file)
+                        with open(local_file, 'rb') as lfd:
+                            print(binascii.hexlify(
+                                hashlib.md5(lfd.read()).digest()
+                            ))
+
+                        import ipdb; ipdb.set_trace()
+                        pass
+
+                    filename = '{}.{}'.format(doc_id, extension)
+                    local_file = os.path.join(cache_dir, filename)
+                    sftp.get(filename, localpath=local_file)
 
             only_local = local.difference(remote)
             print("Files only present locally: ")
