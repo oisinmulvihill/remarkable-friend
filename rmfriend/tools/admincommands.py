@@ -7,7 +7,6 @@ Oisin Mulvihill
 2018-03-10
 
 """
-import os
 import sys
 import getpass
 import logging
@@ -156,84 +155,73 @@ class AdminCommands(cmdln.Cmdln):
         table = AsciiTable(table_listing)
         print(table.table)
 
-    def do_sync_ls(self, subcmd, opts, *args, **kwargs):
-        """${cmd_name}: Show a list of notebooks on reMarkable.
+    def do_rsync(self, subcmd, opts, *args, **kwargs):
+        """${cmd_name}: Update the local cache with new & changed notebooks.
 
         ${cmd_usage}
         ${cmd_option_list}
 
         """
-        config = userconfig.recover_or_create()
-        address = config['rmfriend']['address']
-        username = config['rmfriend']['username']
-        cache_dir = config['rmfriend']['cache_dir']
+        Sync.rsync()
 
-        auth = dict(
-            hostname=address,
-            username=username,
-        )
-        with SFTP.connect(**auth) as sftp:
-            remote_notebooks = SFTP.notebooks_from_listing(sftp.listdir())
-            SFTP.notebook_remote_status(sftp, remote_notebooks)
+    def do_generate_previews(self, subcmd, opts, *args, **kwargs):
+        """${cmd_name}: Generate the notebook file previews.
 
-            local_notebooks = Sync.notebooks_cache_status()
+        ${cmd_usage}
+        ${cmd_option_list}
 
-            remote = set(remote_notebooks.keys())
-            local = set(local_notebooks.keys())
+        """
+        Sync.generate_previews()
 
-            present_on_both = local.union(remote)
-            for doc_id in present_on_both:
-                for extension in remote_notebooks[doc_id]:
-                    if extension in (
-                        'thumbnails', 'cache', 'backup', 'highlights'
-                    ):
-                        # ignore for the moment
-                        continue
+    def do_cache_status(self, subcmd, opts, *args, **kwargs):
+        """${cmd_name}: Update the local cache with new & changed notebooks.
 
-                    auth['ssh_only'] = True
-                    with SFTP.connect(**auth) as ssh:
-                        filename = '{}.{}'.format(doc_id, extension)
-                        stdin, stdout, stderr = ssh.exec_command(
-                        'cd {} ; md5sum {}'.format(
-                            '/home/root/.local/share/remarkable/xochitl',
-                            filename
-                        ))
-                        print(stdout.read())
+        ${cmd_usage}
+        ${cmd_option_list}
 
-                        import hashlib
-                        import binascii
-                        local_file = os.path.join(cache_dir, filename)
-                        with open(local_file, 'rb') as lfd:
-                            print(binascii.hexlify(
-                                hashlib.md5(lfd.read()).digest()
-                            ))
+        """
+        notebooks = Sync.notebook_cache()
 
-                        import ipdb; ipdb.set_trace()
-                        pass
+        listing = [
+            ('Last Access', 'Last Modified', 'Size', 'URL')
+        ]
+        for doc_id in notebooks:
+            for ext in notebooks[doc_id]:
+                nb = notebooks[doc_id][ext]
+                listing.append(
+                    (
+                        nb['last_access'],
+                        nb['last_modification'],
+                        nb['size'],
+                        nb['url'],
+                    )
+                )
 
-                    filename = '{}.{}'.format(doc_id, extension)
-                    local_file = os.path.join(cache_dir, filename)
-                    sftp.get(filename, localpath=local_file)
+        table = AsciiTable(listing)
+        print(table.table)
 
-            only_local = local.difference(remote)
-            print("Files only present locally: ")
-            print(only_local)
+    def do_notebook_previews(self, subcmd, opts, *args, **kwargs):
+        """${cmd_name}: Show the notebook preview listing.
 
-            # Recover the file present on reMarkable and store them locally
-            only_remote = remote.difference(local)
-            for doc_id in only_remote:
-                for extension in remote_notebooks[doc_id]:
-                    if extension in (
-                        'thumbnails', 'cache', 'backup', 'highlights'
-                    ):
-                        # ignore for the moment
-                        continue
+        The generate_previews create an index we can use to reference a
+        notebook and its pages. This will be used in the UI.
 
-                    print('doc_id: {} extension: {}'.format(doc_id, extension))
-                    filename = '{}.{}'.format(doc_id, extension)
-                    local_file = os.path.join(cache_dir, filename)
-                    sftp.get(filename, localpath=local_file)
+        ${cmd_usage}
+        ${cmd_option_list}
 
+        """
+        notebooks = Sync.notebook_previews()
 
+        listing = [
+            ('Name', 'Pages')
+        ]
+        for notebook in notebooks:
+            listing.append(
+                (
+                    notebook['name'],
+                    len(notebook['pages']),
+                )
+            )
 
-
+        table = AsciiTable(listing)
+        print(table.table)

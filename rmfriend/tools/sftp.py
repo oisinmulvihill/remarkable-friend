@@ -10,6 +10,7 @@ from contextlib import contextmanager
 
 import paramiko
 
+from rmfriend.utils import filename_from
 from rmfriend.utils import document_id_and_extension
 
 
@@ -20,48 +21,6 @@ def get_log(e=None):
 class SFTP(object):
     """
     """
-    @classmethod
-    def notebooks_from_listing(cls, dir_listing):
-        """Recover the listing of notebooks from the raw directory listing.
-
-        :param dir_listing: A list of of file names with extensions.
-
-        :returns: A dict of notebook document ids.
-
-        E.g.::
-
-            {
-                '04b68eba-86f5-41fc-aa5d-e38f948ea109': {
-                    'metadata': {},
-                    'content': {},
-                    'lines': {},
-                    'pagedata': {},
-                    'cache': {},
-                },
-                :
-                etc
-            }
-
-        """
-        results = collections.defaultdict(dict)
-
-        for entry in dir_listing:
-            document_id, extension = document_id_and_extension(entry)
-            found = results[document_id]
-            if extension:
-                found[extension] = {}
-            results[document_id] = found
-
-        # filter out anything that doesn't have the 'lines' extension as this
-        # is not a notebook. It could be a PDF for example.
-        results = {
-            doc_id: parts
-            for (doc_id, parts) in results.items()
-            if 'lines' in parts
-        }
-
-        return dict(results)
-
     @classmethod
     @contextmanager
     def connect(
@@ -113,6 +72,44 @@ class SFTP(object):
         log.info("Connection to device '{}' closed.".format(hostname))
 
     @classmethod
+    def notebooks_from_listing(cls, dir_listing):
+        """Recover the listing of notebooks from the raw directory listing.
+
+        :param dir_listing: A list of of file names with extensions.
+
+        :returns: A dict of notebook document ids.
+
+        E.g.::
+
+            {
+                '04b68eba-86f5-41fc-aa5d-e38f948ea109': {
+                    'metadata': {},
+                    'content': {},
+                    'lines': {},
+                },
+                :
+                etc
+            }
+
+        """
+        results = collections.defaultdict(dict)
+
+        for entry in dir_listing:
+            document_id, extension = document_id_and_extension(entry)
+
+            if extension == 'pdf':
+                # skip PDFs
+                continue
+
+            if extension in ('lines', 'metadata', 'content'):
+                found = results[document_id]
+                if extension:
+                    found[extension] = {}
+                results[document_id] = found
+
+        return dict(results)
+
+    @classmethod
     def get(cls, sftp, filename):
         """Recover the given file's contents from the remote side.
 
@@ -129,7 +126,49 @@ class SFTP(object):
         return fd.read()
 
     @classmethod
-    def notebook_remote_status(cls, sftp, notebooks):
+    def recover_notebooks(
+        cls, sftp, cache_dir, notebooks, document_ids, progress_callback
+    ):
+        """
+        """
+        progress = 1
+        total = len(document_ids)
+
+        for doc_id in document_ids:
+            for extension in notebooks[doc_id]:
+                progress += 1
+
+                if extension not in ('lines', 'metadata', 'content'):
+                    # ignore for the moment
+                    continue
+
+                # Recover to the cache:
+                local_file = filename_from(
+                    doc_id, extension, cache_dir
+                )
+                remote_file = filename_from(doc_id, extension)
+                sftp.get(remote_file, localpath=local_file)
+
+                progress_callback(total, progress)
+
+    @classmethod
+    def remote_md5sum(cls, ssh, remote_dir, filename):
+        """
+        """
+        remote_file = '{}/{}'.format(remote_dir, filename)
+        command = 'md5sum {}'.format(remote_file)
+        stdin, stdout, stderr = ssh.exec_command(command)
+        # split the md5sum line into sum and filename
+        #   2decad2252e3cd09fb2cfa19118b250b  \
+        #       93861cf6-dffc-45cd-ae02-25283e71c4db.content
+        # returning just 2decad2252e3cd09fb2cfa19118b250b
+        remote_md5 = stdout.read().decode().strip().split(' ')[0]
+        return remote_md5
+
+    @classmethod
+    def notebook_remote_status(
+        cls, sftp, ssh, remote_dir, notebooks, progress_callback
+    ):
         """Update the notebooks give with filesystem information.
 
         :param sftp: See connect() for details.
@@ -147,16 +186,29 @@ class SFTP(object):
                 }
 
         """
+        progress = 1
+        total = len(sftp.listdir_attr())
         for item in sftp.listdir_attr():
             (document_id, extension) = document_id_and_extension(
                 item.filename
             )
-            if document_id in notebooks:
-                notebooks[document_id][extension] = {
-                    'last_access': item.st_atime,
-                    'last_modification': item.st_mtime,
-                    'size': item.st_size,
-                }
+
+            progress += 1
+
+            if document_id not in notebooks:
+                continue
+
+            if extension not in ('lines', 'metadata', 'content'):
+                continue
+
+            md5sum = cls.remote_md5sum(ssh, remote_dir, item.filename)
+            progress_callback(total, progress)
+            notebooks[document_id][extension] = {
+                'last_access': item.st_atime,
+                'last_modification': item.st_mtime,
+                'size': item.st_size,
+                'md5sum': md5sum,
+            }
 
     @classmethod
     def notebook_ls(cls, sftp, notebooks):

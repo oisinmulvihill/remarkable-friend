@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 """
-from PIL import Image, ImageDraw
-
 from rmfriend.export.base import Base
 from rmfriend.export.base import grouper
 
@@ -16,6 +14,8 @@ class Export(Base):
     def convert(cls, notebook, output_prefix='test-png'):
         """Convert the notebook into SVG images
         """
+        from PIL import Image, ImageDraw
+
         drawings = []
 
         for page in notebook.pages.pages:

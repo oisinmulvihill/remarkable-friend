@@ -49,7 +49,8 @@ def recover_or_create():
             'address': '10.11.99.1',
             'port': '22',
             'username': 'root',
-            'cache_dir': cache_dir
+            'cache_dir': cache_dir,
+            'remote_dir': '/home/root/.local/share/remarkable/xochitl'
         }
         with open(config_file, 'w') as fd:
             config.write(fd)

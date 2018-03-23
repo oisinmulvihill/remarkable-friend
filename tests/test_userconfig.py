@@ -46,6 +46,9 @@ def test_recover_or_create(Path, tmpdir):
     assert cfg['rmfriend']['port'] == '22'
     assert cfg['rmfriend']['username'] == 'root'
     assert cfg['rmfriend']['cache_dir'] == str(notebooks)
+    assert cfg['rmfriend']['remote_dir'] == (
+        '/home/root/.local/share/remarkable/xochitl'
+    )
 
     # Calling the second time will re-read from the already present config
     # file so there should be no problems.
@@ -55,3 +58,6 @@ def test_recover_or_create(Path, tmpdir):
     assert cfg['rmfriend']['port'] == '22'
     assert cfg['rmfriend']['username'] == 'root'
     assert cfg['rmfriend']['cache_dir'] == str(notebooks)
+    assert cfg['rmfriend']['remote_dir'] == (
+        '/home/root/.local/share/remarkable/xochitl'
+    )

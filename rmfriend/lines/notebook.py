@@ -24,6 +24,7 @@ class FileHeader(Base):
 class Notebook(Base):
     """
     """
+
     def __init__(self, header, pages):
         """
         """
@@ -50,7 +51,7 @@ class Notebook(Base):
 
         # Start the generator off at position 0 ready to extract the file
         # header.
-        print(next(position))
+        next(position)
 
         # recover the header
         file_header = FileHeader.parse(position)
