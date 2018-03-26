@@ -17,7 +17,7 @@ from terminaltables import AsciiTable
 from rmfriend import userconfig
 from rmfriend.tools.sftp import SFTP
 from rmfriend.tools.sync import Sync
-from rmfriend.lines.notebook import Notebook
+from rmfriend.lines.notebooklines import NotebookLines
 
 
 def get_log(e=None):
@@ -50,10 +50,10 @@ class AdminCommands(cmdln.Cmdln):
         return_code = 0
 
         log.debug("Reading file '{}'".format(lines_file))
-        data = Notebook.read(lines_file)
+        data = NotebookLines.read(lines_file)
 
         log.debug("Parsing file '{}'".format(lines_file))
-        notebook = Notebook.parse(data)
+        notebook = NotebookLines.parse(data)
 
         log.debug("{} has '{}' pages.".format(
             lines_file, notebook.pages.count
@@ -80,10 +80,10 @@ class AdminCommands(cmdln.Cmdln):
         return_code = 0
 
         log.debug("Reading file '{}'".format(lines_file))
-        data = Notebook.read(lines_file)
+        data = NotebookLines.read(lines_file)
 
         log.debug("Parsing file '{}'".format(lines_file))
-        notebook = Notebook.parse(data)
+        notebook = NotebookLines.parse(data)
 
         log.debug("{} has '{}' pages.".format(
             lines_file, notebook.pages.count

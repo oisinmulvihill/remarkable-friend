@@ -31,6 +31,9 @@ class Export(Base):
 
             for layer in page.layers.layers:
                 for line in layer.lines.lines:
+                    if line.brush_type.name in ('eraser', 'erase_area'):
+                        continue
+
                     last_point = None
                     for (p1, p2) in grouper(line.points.points, 2, 'X'):
                         if p1 == 'X' or p2 == 'X':

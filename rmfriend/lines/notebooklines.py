@@ -21,7 +21,7 @@ class FileHeader(Base):
         self.header = header.decode('ascii')
 
 
-class Notebook(Base):
+class NotebookLines(Base):
     """
     """
 
@@ -29,7 +29,13 @@ class Notebook(Base):
         """
         """
         self.file_header = header
-        self.pages = pages
+        self.pages_ = pages
+
+    @property
+    def pages(self):
+        """Return the pages from the self.pages_ (Pages instance).
+        """
+        return self.pages_.pages
 
     @classmethod
     def read(cls, filename):
@@ -60,7 +66,7 @@ class Notebook(Base):
         # Now recover all the pages contained content:
         pages = Pages.parse(position)
 
-        notebook = Notebook(file_header, pages)
+        notebook = NotebookLines(file_header, pages)
 
         position.close()
 

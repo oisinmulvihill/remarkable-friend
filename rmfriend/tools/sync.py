@@ -15,8 +15,8 @@ from pathlib import Path
 from rmfriend import userconfig
 from rmfriend.export import svg
 from rmfriend.tools.sftp import SFTP
-from rmfriend.lines.notebook import Notebook
 from rmfriend.utils import document_id_and_extension
+from rmfriend.lines.notebooklines import NotebookLines
 
 
 class Sync(object):
@@ -32,6 +32,9 @@ class Sync(object):
         cache_dir = Path(config['rmfriend']['cache_dir'])
 
         for item in cache_dir.iterdir():
+            if item.is_dir():
+                # Skip for the moment
+                continue
             doc_id, ext = document_id_and_extension(item.name)
             md5sum = binascii.hexlify(
                 hashlib.md5(item.read_bytes()).digest()
@@ -81,7 +84,7 @@ class Sync(object):
                 except ValueError:
                     pass
             name = metadata.get('visibleName')
-            notebook = Notebook.parse(item.read_bytes())
+            notebook = NotebookLines.parse(item.read_bytes())
             image_filename = "{}-page".format(doc_id)
             image_index = {'id': doc_id, 'name': name, 'pages': []}
             index_filename = str(preview_dir / "{}.page_index".format(doc_id))
