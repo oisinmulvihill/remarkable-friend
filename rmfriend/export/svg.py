@@ -11,14 +11,14 @@ class Export(Base):
     """
     """
     @classmethod
-    def convert(cls, notebook, output_prefix='test-svg'):
-        """Convert the notebook into SVG images
+    def convert(cls, lines, output_prefix='test-svg'):
+        """Convert the notebook lines into SVG images
         """
         drawings = []
 
-        for page in notebook.pages.pages:
+        for page in lines.pages:
             file_name = cls.page_to_filename(
-                output_prefix, notebook.pages.count, page.number, 'svg'
+                output_prefix, lines.page_count, page.number, 'svg'
             )
 
             dwg = svgwrite.Drawing(

@@ -13,7 +13,7 @@ class MetaData(object):
 
     """
 
-    def __init__(self, data):
+    def __init__(self, data={}):
         """
         """
         self.data_ = data
@@ -21,25 +21,32 @@ class MetaData(object):
     @property
     def name(self):
         """Attempt to return the notebooks visibleName field."""
-        self.data_.get('visibleName', '')
+        return self.data_.get('visibleName', '<No Name>')
+
+    @property
+    def version(self):
+        """Attempt to return the version field."""
+        return self.data_.get('version', 1)
 
     @property
     def last_modified(self):
         """Attempt to an ISO8601 string for the lastModified field."""
-        last_modified = self.data_.get('lastModified', '0')
-        # Time in gmt hack really as its and epoch timestamp with timezone
-        last_modified = int(last_modified[:-3])
-        last_modified = time.strftime(
-            '%Y-%m-%d %H:%M:%S+Z', time.gmtime(last_modified)
-        )
+        last_modified = self.data_.get('lastModified', '')
+        if last_modified:
+            # Time in UTC, convert from epoch timestamp in milliseconds to
+            # seconds:
+            last_modified = int(last_modified) / 1000
+            last_modified = time.strftime(
+                '%Y-%m-%d %H:%M:%S+Z', time.gmtime(last_modified)
+            )
         return last_modified
 
     @classmethod
-    def new_meta_data(cls):
+    def new(cls):
         """Returns a default meta data dict for create meta data instances."""
-        return {
+        return cls(data={
             "deleted": False,
-            "lastModified": "0",
+            "lastModified": "",
             "metadatamodified": False,
             "modified": False,
             "parent": "",
@@ -48,13 +55,13 @@ class MetaData(object):
             "type": "DocumentType",
             "version": 1,
             "visibleName": "<No Name>"
-        }
+        })
 
     @classmethod
-    def parse(cls, meta_data=None):
+    def parse(cls, meta_data):
         """Return a MetaData instance for the given data.
 
-        :param page_data: A string of JSON data.
+        :param meta_data: A string of JSON data.
 
         E.g.::
 
@@ -72,10 +79,8 @@ class MetaData(object):
             }'
 
         """
-        if meta_data:
-            meta_ = json.loads(meta_data)
+        return cls(data=json.loads(meta_data))
 
-        else:
-            meta_ = cls.new_meta_data()
-
-        return cls(meta_)
+    def dump(self):
+        """Return JSON string of the internal data we could write to disk."""
+        return json.dumps(self.data_)

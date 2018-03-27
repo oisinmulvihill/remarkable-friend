@@ -3,6 +3,7 @@
 """
 import uuid
 
+from rmfriend.content import Content
 from rmfriend.pagedata import PageData
 from rmfriend.metadata import MetaData
 from rmfriend.lines.notebooklines import NotebookLines
@@ -45,9 +46,14 @@ class Notebook(object):
       - 'cache' this directory contains a a full sized  each page. For example:
       '0.jpg, 1.jpg,  3.jpg, etc'
 
+      - 'highlights': I don't know what to do with this just yet.
+
     """
 
-    def __init__(self, document_id, page_data, lines, meta_data):
+    def __init__(
+        self, document_id, page_data, lines, meta_data, content, thumbnails=[],
+        cache=[]
+    ):
         """
         """
         self.document_id = document_id
@@ -57,9 +63,42 @@ class Notebook(object):
         self.lines = lines
         # A MetaData instance:
         self.meta_data = meta_data
+        # A Content instance:
+        self.content = content
+        # Directories
+        self.thumbnails = thumbnails
+        self.cache = cache
+
+    @property
+    def name(self):
+        """Return the meta data's name property."""
+        return self.meta_data.name
+
+    @property
+    def last_modified(self):
+        """Return the meta data's last modified property."""
+        return self.meta_data.last_modified
+
+    @property
+    def last_opened_page(self):
+        """Return the content's last opened page property."""
+        return self.content.last_opened_page
+
+    @property
+    def page_count(self):
+        """Return the lines's file count of pages."""
+        return self.lines.page_count()
+
+    @property
+    def version(self):
+        """Return the metadata's version."""
+        return self.meta_data.version
 
     @classmethod
-    def parse(cls, document_id, page_data, lines, meta_data):
+    def parse(
+        cls, document_id, page_data, lines, meta_data, content, thumbnails=[],
+        cache=[]
+    ):
         """Return a Notebook for the given sections.
 
         :param document_id: The UUID string for this notebook.
@@ -68,6 +107,12 @@ class Notebook(object):
 
         :param meta_data: The raw meta JSON for this notebook.
 
+        :param content: The raw content JSON for this notebook.
+
+        :param thumbnails: A list of file present in the thumbnails directory.
+
+        :param cache: A list of files present in the cache directory.
+
         """
         return cls(
             # verify this is actually a UUID formatted string.
@@ -75,4 +120,19 @@ class Notebook(object):
             page_data=PageData.parse(page_data),
             lines=NotebookLines.parse(lines),
             meta_data=MetaData.parse(meta_data),
+            content=Content.parse(content),
+            thumbnails=thumbnails,
+            cache=cache,
+        )
+
+    def dump(self):
+        """Return a dict of and the raw versions of each extension part."""
+        return dict(
+            document_id=self.document_id,
+            page_data=self.page_data.dump(),
+            lines=self.lines.dump(),
+            meta_data=self.meta_data.dump(),
+            content=self.content.dump(),
+            thumbnails=self.thumbnails,
+            cache=self.cache,
         )

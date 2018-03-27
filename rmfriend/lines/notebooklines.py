@@ -2,6 +2,7 @@
 """
 """
 import os
+import struct
 
 from rmfriend.lines.base import Base
 from rmfriend.lines.pages import Pages
@@ -20,6 +21,11 @@ class FileHeader(Base):
         """
         self.header = header.decode('ascii')
 
+    def dump_to(self, raw_bytes):
+        """
+        """
+        raw_bytes += struct.pack(self.fmt, self.header.encode())
+
 
 class NotebookLines(Base):
     """
@@ -29,6 +35,7 @@ class NotebookLines(Base):
         """
         """
         self.file_header = header
+        # A Pages instance
         self.pages_ = pages
 
     @property
@@ -36,6 +43,12 @@ class NotebookLines(Base):
         """Return the pages from the self.pages_ (Pages instance).
         """
         return self.pages_.pages
+
+    @property
+    def page_count(self):
+        """Return the pages from the self.pages_.count (Pages instance).
+        """
+        return self.pages_.count
 
     @classmethod
     def read(cls, filename):
@@ -48,6 +61,14 @@ class NotebookLines(Base):
             raw_binary = fd.read()
 
         return raw_binary
+
+    @classmethod
+    def new(cls, pages=[]):
+        """Returns and empty NotebookLines instance."""
+        return cls(
+            header=FileHeader.EXPECTED,
+            pages=Pages.new(pages=pages)
+        )
 
     @classmethod
     def parse(cls, raw_bytes):
@@ -71,3 +92,13 @@ class NotebookLines(Base):
         position.close()
 
         return notebook
+
+    def dump(self):
+        """
+        """
+        raw_bytes = b''
+
+        self.header.dump_to(raw_bytes)
+        self.pages_.dump_to(raw_bytes)
+
+        return raw_bytes

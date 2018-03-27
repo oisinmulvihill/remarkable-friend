@@ -14,13 +14,17 @@ class PageData(object):
 
     """
 
-    def __init__(self, pages):
+    def __init__(self, pages=[]):
         """
         """
         self.pages = pages
 
     @classmethod
-    def parse(cls, page_data=None):
+    def new(cls):
+        return cls()
+
+    @classmethod
+    def parse(cls, page_data):
         """Return a Pagedata instance for the given data.
 
         :param page_data: A string of page data lines.
@@ -43,3 +47,7 @@ class PageData(object):
             pages = []
 
         return cls(pages)
+
+    def dump(self):
+        """A list of page templates one per line ready to write to disk."""
+        return "\n".join(self.pages)

@@ -2,8 +2,8 @@
 """
 """
 import os
-import json
 import logging
+import pathlib
 
 import pytest
 
@@ -53,8 +53,7 @@ example_lines_file = lines
 
 @pytest.fixture(scope='function')
 def metadata(request):
-    metadata = example_file('metadata', 'r')
-    return json.loads(metadata)
+    return example_file('metadata', 'r')
 
 
 @pytest.fixture(scope='function')
@@ -65,6 +64,52 @@ def pagedata(request):
 @pytest.fixture(scope='function')
 def content(request):
     return example_file('content', 'r')
+
+
+@pytest.fixture(scope='function')
+def triangle_notebook():
+    """Recover all the parts from the 'triangle' notebook.
+
+    examples/0e7143f2-e82d-4402-8eb5-39811ddbb936.(
+        lines|content|pagedata|metadata|thumbnails|cache
+    )
+
+    :returns: A dict with all the parts.
+
+    """
+    document_id = '0e7143f2-e82d-4402-8eb5-39811ddbb936'
+
+    tests_dir = pathlib.Path(os.path.split(__file__)[0])
+    examples_dir = tests_dir / 'examples'
+
+    def get_(extension):
+        filename = str(examples_dir / '{}.{}'.format(document_id, extension))
+        open_as = 'r'
+        if extension == 'lines':
+            open_as = 'rb'
+
+        if extension in ('thumbnails', 'cache'):
+            dirname = pathlib.Path(filename)
+            if dirname.is_dir():
+                data = [item.name for item in dirname.iterdir()]
+            else:
+                data = []
+
+        else:
+            with open(filename, open_as) as fd:
+                data = fd.read()
+
+        return data
+
+    return {
+        'document_id': document_id,
+        'lines': get_('lines'),
+        'metadata': get_('metadata'),
+        'pagedata': get_('pagedata'),
+        'content': get_('content'),
+        'thumbnails': get_('thumbnails'),
+        'cache': get_('cache'),
+    }
 
 
 @pytest.fixture(scope='function')

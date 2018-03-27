@@ -20,6 +20,12 @@ class Page(Int32):
         """
         return Page(number, Layers.parse(position))
 
+    def dump_to(self, raw_bytes):
+        """
+        """
+        for page in self.pages:
+            page.dump_to(raw_bytes)
+
 
 class Pages(Int32):
     """
@@ -31,9 +37,23 @@ class Pages(Int32):
         self.pages = pages
 
     @classmethod
+    def new(cls, pages=[]):
+        """Return a new instance with the given Page instances."""
+        return Pages(len(pages), pages)
+
+    @classmethod
     def parse(cls, position):
         """
         """
         count = position.send(cls)
         pages = [Page.parse(number, position) for number in range(count)]
         return Pages(count, pages)
+
+    def dump_to(self, raw_bytes):
+        """
+        """
+        page.dump_to(raw_bytes)
+
+        for page in self.pages:
+            page.dump_to(raw_bytes)
+

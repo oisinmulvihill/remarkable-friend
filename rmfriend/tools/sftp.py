@@ -96,18 +96,24 @@ class SFTP(object):
 
         for entry in dir_listing:
             document_id, extension = document_id_and_extension(entry)
+            found = results[document_id]
+            if extension:
+                found[extension] = {}
+            results[document_id] = found
 
-            if extension == 'pdf':
-                # skip PDFs
-                continue
+        # filter out the non notebooks based on the collection we have
+        # recovered.
+        returned = {}
+        for document_id in results:
+            extensions = list(results[document_id].keys())
+            if 'pdf' in extensions or 'epub' in extensions:
+                print("Ignoring '{}' as its not to be a notebook: {}".format(
+                    document_id, extensions,
+                ))
+            else:
+                returned[document_id] = results[document_id]
 
-            if extension in ('lines', 'metadata', 'content'):
-                found = results[document_id]
-                if extension:
-                    found[extension] = {}
-                results[document_id] = found
-
-        return dict(results)
+        return returned
 
     @classmethod
     def get(cls, sftp, filename):
