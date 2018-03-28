@@ -8,16 +8,26 @@ For the GUI and MacOSX app see the frontend repository:
 
  - https://github.com/oisinmulvihill/remarkable-friend-ui
 
-My first goal is to be able to copy pages from one notebook to another.
+I have successfully implemented copying pages from an existing notebook into a
+new one. Don't get too excited just yet, as I've only demonstrated this in my
+unit tests. I need to wire this into the "rmfriend" command line tool as a
+demonstration. I've also discovered that the reMarkable interface needs to
+be restarted in order pickup new notebooks transferred to it. You could restart
+reMarkable however that is slower. Currently I just manually do::
 
-I've successfully parsed the notebooks and can now convert the binary format
-into SVG or PNG images. I haven't yet written the format back to disk. This
-would open the possiblity of generating lines files.
+	# I've key exchanged so I don't need a password:
+	ssh root@10.11.99.1 systemctl restart xochitl
 
-I'm work on getting a listing of files from the device. You can now see a
-human friendly listing of notebooks. Next will be working on transferring and
-caching notebooks. Then generating page previews to aid manipulation of the
-notebooks.
+I can now read and write a notebooks. Notebooks consist of a series of files
+which have the same UUID filename but with different extensions. I read/write
+metadata, content and lines (raw drawing information) files. I currently also
+read the thumbnails and cache directories. I've also implemented rudimentaty rendering of notebook lines files to SVG or PNG images.
+
+I'm also working on the syncronisation of notebooks from reMarkable to a cache
+stored on the desktop. I was originally generate the PNG previews for the
+remarkable-friend-ui, however this has proved to slow. I'm going to sync the
+cache/thumbnails the reMarkable generates. I can then use these in the frontend
+instead.
 
 I've been inspired by the hard work of the following projects which worked-out
 the reMarkable lines file format.
