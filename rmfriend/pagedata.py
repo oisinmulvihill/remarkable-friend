@@ -21,13 +21,14 @@ class PageData(object):
 
     @classmethod
     def new(cls):
+        print("new")
         return cls()
 
     @classmethod
-    def parse(cls, page_data):
+    def load(cls, pagedata):
         """Return a Pagedata instance for the given data.
 
-        :param page_data: A string of page data lines.
+        :param pagedata: A string of page data lines.
 
         E.g.::
 
@@ -36,12 +37,12 @@ class PageData(object):
             LS Grid margin large
             P Grid large
 
-        If page_data is not given or is empty the the Pagedata instance will
+        If pagedata is not given or is empty the the Pagedata instance will
         not contain any pages. Is this actually possible? I'm not sure.
 
         """
-        if page_data and page_data.strip():
-            pages = [page for page in page_data.split('\n') if page.strip()]
+        if pagedata and pagedata.strip():
+            pages = [page for page in pagedata.split('\n') if page.strip()]
 
         else:
             pages = []
@@ -50,4 +51,4 @@ class PageData(object):
 
     def dump(self):
         """A list of page templates one per line ready to write to disk."""
-        return "\n".join(self.pages)
+        return "\n".join(self.pages) if self.pages else ""

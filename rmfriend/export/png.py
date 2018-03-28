@@ -18,9 +18,9 @@ class Export(Base):
 
         drawings = []
 
-        for page in notebook.pages.pages:
+        for page in notebook.pages:
             file_name = cls.page_to_filename(
-                output_prefix, notebook.pages.count, page.number, 'png'
+                output_prefix, notebook.page_count, page.number, 'png'
             )
             image = Image.new(
                 'RGBA',

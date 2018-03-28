@@ -29,7 +29,7 @@ def test_primitives(logger, class_, raw_bytes, expected):
     data = next(position)
     assert data == ''
 
-    result = class_.parse(position)
+    result = class_.load(position)
 
     if issubclass(class_, Float):
         assert round(result.value, 3) == expected
@@ -39,7 +39,7 @@ def test_primitives(logger, class_, raw_bytes, expected):
 
 
 def test_point_parse(logger):
-    """Verify Point parse from raw bytes.
+    """Verify Point.load from raw bytes.
     """
     raw_bytes = b''
     point_data_fragment = [
@@ -57,7 +57,7 @@ def test_point_parse(logger):
     data = next(position)
     assert data == ''
 
-    result = lines.Point.parse(position)
+    result = lines.Point.load(position)
     assert round(result.x, 3) == 12.341
     assert round(result.y, 3) == 107.301
     assert round(result.pressure, 3) == 0.351
@@ -66,7 +66,7 @@ def test_point_parse(logger):
 
 
 def test_points_class_parse(logger):
-    """Verify Points class parse which creates individual Point instances from
+    """Verify Points class.load which creates individual Point instances from
     raw bytes.
 
     """
@@ -89,7 +89,7 @@ def test_points_class_parse(logger):
     data = next(position)
     assert data == ''
 
-    result = lines.Points.parse(position)
+    result = lines.Points.load(position)
     assert result.count == 1
     assert len(result.points) == 1
     result = result.points[0]
@@ -116,7 +116,7 @@ def test_line_attribute_brush_base_size(logger, raw_bytes, value, name):
     data = next(position)
     assert data == ''
 
-    result = lines.BrushBaseSize.parse(position)
+    result = lines.BrushBaseSize.load(position)
     assert result.value == value
     assert result.name == name
 
@@ -138,7 +138,7 @@ def test_line_attribute_colour(logger, raw_bytes, value, name):
     data = next(position)
     assert data == ''
 
-    result = lines.Colour.parse(position)
+    result = lines.Colour.load(position)
     assert result.value == value
     assert result.name == name
 
@@ -153,7 +153,7 @@ def test_line_attribute_lineattribute1(logger):
     data = next(position)
     assert data == ''
 
-    result = lines.LineAttribute1.parse(position)
+    result = lines.LineAttribute1.load(position)
     assert result.value == 0
 
 
@@ -180,13 +180,13 @@ def test_line_attribute_brush_type(logger, raw_bytes, value, name):
     data = next(position)
     assert data == ''
 
-    result = lines.BrushType.parse(position)
+    result = lines.BrushType.load(position)
     assert result.value == value
     assert result.name == name
 
 
 def test_line_class_parse(logger):
-    """Verify Line class parse from raw bytes.
+    """Verify Line class.load from raw bytes.
 
     """
     raw_bytes = b''
@@ -232,7 +232,7 @@ def test_line_class_parse(logger):
     data = next(position)
     assert data == ''
 
-    result = lines.Line.parse(position)
+    result = lines.Line.load(position)
     assert result.brush_type.name == 'pen'
     assert result.colour.name == 'black'
     assert result.line_attribute1.value == 0
@@ -247,7 +247,7 @@ def test_line_class_parse(logger):
 
 
 def test_lines_class_parse(logger):
-    """Verify Lines class parse which creates an individual line instances from
+    """Verify Lines class.load which creates an individual line instances from
     raw bytes.
 
     """
@@ -299,7 +299,7 @@ def test_lines_class_parse(logger):
     data = next(position)
     assert data == ''
 
-    result = lines.Lines.parse(position)
+    result = lines.Lines.load(position)
     assert result.count == 1
     assert len(result.lines) == 1
     result = result.lines[0]

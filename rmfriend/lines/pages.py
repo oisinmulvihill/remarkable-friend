@@ -10,6 +10,7 @@ from rmfriend.lines.layers import Layers
 class Page(Int32):
     """
     """
+
     def __init__(self, number, layers):
         """
         """
@@ -17,25 +18,26 @@ class Page(Int32):
         self.layers = layers
 
     @classmethod
-    def parse(cls, number, position):
+    def load(cls, number, position):
         """
         """
-        return Page(number, Layers.parse(position))
+        return Page(number, Layers.load(position))
 
-    def dump_to(self, raw_bytes):
+    def dump(self):
         """
         """
-        # write out the total layers:
-        raw_bytes += struct.pack(self.fmt, len(self.layers))
+        raw_bytes = b''
 
-        # Now start writing the layers themselves after this:
-        for layer in self.layers:
-            layer.dump_to(raw_bytes)
+        # Now layers will take care of dump individual layer instances:
+        raw_bytes += self.layers.dump()
+
+        return raw_bytes
 
 
 class Pages(Int32):
     """
     """
+
     def __init__(self, count, pages):
         """
         """
@@ -48,20 +50,23 @@ class Pages(Int32):
         return Pages(len(pages), pages)
 
     @classmethod
-    def parse(cls, position):
+    def load(cls, position):
         """
         """
         count = position.send(cls)
-        pages = [Page.parse(number, position) for number in range(count)]
+        pages = [Page.load(number, position) for number in range(count)]
         return Pages(count, pages)
 
-    def dump_to(self, raw_bytes):
+    def dump(self):
         """
         """
+        raw_bytes = b''
+
         # write out the total pages:
         raw_bytes += struct.pack(self.fmt, len(self.pages))
 
         # Now start writing the pages themselves after this:
         for page in self.pages:
-            page.dump_to(raw_bytes)
+            raw_bytes += page.dump()
 
+        return raw_bytes

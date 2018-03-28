@@ -8,21 +8,28 @@ from rmfriend.lines.lines import Lines
 class Layer(Int32):
     """
     """
+
     def __init__(self, lines):
         """
         """
         self.lines = lines
 
     @classmethod
-    def parse(cls, position):
+    def load(cls, position):
         """
         """
-        return Layer(Lines.parse(position))
+        return Layer(Lines.load(position))
+
+    def dump(self):
+        """
+        """
+        return self.lines.dump()
 
 
 class Layers(Int32):
     """
     """
+
     def __init__(self, count, layers):
         """
         """
@@ -30,9 +37,21 @@ class Layers(Int32):
         self.layers = layers
 
     @classmethod
-    def parse(cls, position):
+    def load(cls, position):
         """
         """
         count = position.send(cls)
-        layers = [Layer.parse(position) for layer in range(count)]
+        layers = [Layer.load(position) for layer in range(count)]
         return Layers(count, layers)
+
+    def dump(self):
+        """
+        """
+        raw_bytes = b''
+
+        count = Int32(len(self.layers))
+        raw_bytes += count.dump()
+        for layer in self.layers:
+            raw_bytes += layer.dump()
+
+        return raw_bytes

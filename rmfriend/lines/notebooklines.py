@@ -21,10 +21,10 @@ class FileHeader(Base):
         """
         self.header = header.decode('ascii')
 
-    def dump_to(self, raw_bytes):
+    def dump(self):
         """
         """
-        raw_bytes += struct.pack(self.fmt, self.header.encode())
+        return struct.pack(self.fmt, bytes(self.header.encode()))
 
 
 class NotebookLines(Base):
@@ -71,7 +71,7 @@ class NotebookLines(Base):
         )
 
     @classmethod
-    def parse(cls, raw_bytes):
+    def load(cls, raw_bytes):
         """
         """
         position = recover(raw_bytes)
@@ -81,11 +81,11 @@ class NotebookLines(Base):
         next(position)
 
         # recover the header
-        file_header = FileHeader.parse(position)
+        file_header = FileHeader.load(position)
         assert file_header.header == FileHeader.EXPECTED
 
         # Now recover all the pages contained content:
-        pages = Pages.parse(position)
+        pages = Pages.load(position)
 
         notebook = NotebookLines(file_header, pages)
 
@@ -98,7 +98,10 @@ class NotebookLines(Base):
         """
         raw_bytes = b''
 
-        self.header.dump_to(raw_bytes)
-        self.pages_.dump_to(raw_bytes)
+        # Add standard header
+        raw_bytes += FileHeader(self.file_header.encode('ascii')).dump()
+
+        # Dump out the rest of the notebook lines
+        raw_bytes += self.pages_.dump()
 
         return raw_bytes

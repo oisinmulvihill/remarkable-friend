@@ -53,7 +53,7 @@ class AdminCommands(cmdln.Cmdln):
         data = NotebookLines.read(lines_file)
 
         log.debug("Parsing file '{}'".format(lines_file))
-        notebook = NotebookLines.parse(data)
+        notebook = NotebookLines.load(data)
 
         log.debug("{} has '{}' pages.".format(
             lines_file, notebook.pages.count
@@ -83,7 +83,7 @@ class AdminCommands(cmdln.Cmdln):
         data = NotebookLines.read(lines_file)
 
         log.debug("Parsing file '{}'".format(lines_file))
-        notebook = NotebookLines.parse(data)
+        notebook = NotebookLines.load(data)
 
         log.debug("{} has '{}' pages.".format(
             lines_file, notebook.pages.count

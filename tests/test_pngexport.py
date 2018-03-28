@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 """
 """
-from rmfriend.export.svg import Export
+from rmfriend.export.png import Export
 from rmfriend.lines.notebooklines import NotebookLines
 
 
-def test_export_lines_to_svg(logger, lines):
+def test_export_lines_to_png(logger, lines):
     """
     """
     notebook_lines = NotebookLines.load(lines)
     assert notebook_lines.page_count == 1
-    for svg_file in Export.convert(notebook_lines):
+    for png_file in Export.convert(notebook_lines):
         pass
-        # svg_file.save()
+        # png_file.save()

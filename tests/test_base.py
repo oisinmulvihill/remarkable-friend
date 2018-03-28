@@ -48,7 +48,7 @@ def test_recover_base(logger):
     data = next(position)
     assert data == ''
 
-    assert AnotherInt32.parse(position).value == 9009
+    assert AnotherInt32.load(position).value == 9009
 
 
 def test_recover_int32(logger):
@@ -61,7 +61,7 @@ def test_recover_int32(logger):
     data = next(position)
     assert data == ''
 
-    assert Int32.parse(position).value == 1001
+    assert Int32.load(position).value == 1001
 
 
 def test_recover_float(logger):
@@ -74,4 +74,4 @@ def test_recover_float(logger):
     data = next(position)
     assert data == ''
 
-    assert round(Float.parse(position).value, 3) == 3.141
+    assert round(Float.load(position).value, 3) == 3.141

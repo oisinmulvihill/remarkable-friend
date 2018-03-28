@@ -29,7 +29,7 @@ class Base(object):
     """
     """
     @classmethod
-    def parse(cls, position):
+    def load(cls, position):
         """Using the classes fmt recover that amount of data next from the
         current position. This will then return the data and the byte size  of
         the data recovered.
@@ -40,6 +40,10 @@ class Base(object):
 
         """
         return cls(position.send(cls))
+
+    def dump(self):
+        """Returns the struct.pack of self.fmt and value."""
+        return struct.pack(self.fmt, self.value)
 
 
 class Int32(Base):

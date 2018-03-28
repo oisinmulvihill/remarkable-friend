@@ -248,6 +248,7 @@ class SFTP(object):
             # for extension in ('metadata', 'content'):
             for extension in ('metadata',):
                 file_ = "{}.{}".format(document_id, extension)
+                print("file: {}".format(file_))
                 data = cls.get(sftp, file_)
                 notebooks[document_id][extension] = json.loads(data)
 

@@ -54,14 +54,14 @@ class MetaData(object):
             "synced": False,
             "type": "DocumentType",
             "version": 1,
-            "visibleName": "<No Name>"
+            "visibleName": "No Name"
         })
 
     @classmethod
-    def parse(cls, meta_data):
+    def load(cls, metadata):
         """Return a MetaData instance for the given data.
 
-        :param meta_data: A string of JSON data.
+        :param metadata: A string of JSON data.
 
         E.g.::
 
@@ -79,8 +79,8 @@ class MetaData(object):
             }'
 
         """
-        return cls(data=json.loads(meta_data))
+        return cls(data=json.loads(metadata))
 
     def dump(self):
         """Return JSON string of the internal data we could write to disk."""
-        return json.dumps(self.data_)
+        return json.dumps(self.data_, indent=4)

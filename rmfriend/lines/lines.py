@@ -33,6 +33,7 @@ class RotY(Float):
 class Point(Float):
     """An individual point on a line.
     """
+
     def __init__(self, x, y, pressure, rot_x, rot_y):
         """
         """
@@ -43,16 +44,34 @@ class Point(Float):
         self.rot_y = rot_y
 
     @classmethod
-    def parse(cls, position):
+    def load(cls, position):
         """
         """
-        x = X.parse(position).value
-        y = Y.parse(position).value
-        pressure = Pressure.parse(position).value
-        rot_x = RotX.parse(position).value
-        rot_y = RotY.parse(position).value
+        x = X.load(position).value
+        y = Y.load(position).value
+        pressure = Pressure.load(position).value
+        rot_x = RotX.load(position).value
+        rot_y = RotY.load(position).value
 
         return Point(x, y, pressure, rot_x, rot_y)
+
+    def dump(self):
+        """
+        """
+        raw_bytes = b''
+
+        x = X(self.x)
+        raw_bytes += x.dump()
+        y = Y(self.y)
+        raw_bytes += y.dump()
+        pressure = Pressure(self.pressure)
+        raw_bytes += pressure.dump()
+        rot_x = RotX(self.rot_x)
+        raw_bytes += rot_x.dump()
+        rot_y = RotX(self.rot_y)
+        raw_bytes += rot_y.dump()
+
+        return raw_bytes
 
     @property
     def x_y(self):
@@ -78,6 +97,7 @@ class Point(Float):
 class Points(Int32):
     """
     """
+
     def __init__(self, count, points):
         """
         """
@@ -85,12 +105,24 @@ class Points(Int32):
         self.points = points
 
     @classmethod
-    def parse(cls, position):
+    def load(cls, position):
         """
         """
         count = position.send(cls)
-        points = [Point.parse(position) for point in range(count)]
+        points = [Point.load(position) for point in range(count)]
         return Points(count, points)
+
+    def dump(self):
+        """
+        """
+        raw_bytes = b''
+
+        count = Int32(len(self.points))
+        raw_bytes += count.dump()
+        for point in self.points:
+            raw_bytes += point.dump()
+
+        return raw_bytes
 
 
 class BrushBaseSize(Float):
@@ -117,7 +149,9 @@ class BrushBaseSize(Float):
 
 
 class LineAttribute1(Int32):
-    """Don't know what this is used for."""
+    """Don't know what this is used for.
+    """
+
     def __init__(self, value):
         """
         """
@@ -173,6 +207,7 @@ class BrushType(Int32):
 class Line(Int32):
     """
     """
+
     def __init__(
         self, brush_type, colour, line_attribute1, brush_base_size, points
     ):
@@ -185,17 +220,30 @@ class Line(Int32):
         self.points = points
 
     @classmethod
-    def parse(cls, position):
+    def load(cls, position):
         """
         """
-        brush_type = BrushType.parse(position)
-        colour = Colour.parse(position)
-        line_attribute1 = LineAttribute1.parse(position)
-        brush_base_size = BrushBaseSize.parse(position)
-        points = Points.parse(position)
+        brush_type = BrushType.load(position)
+        colour = Colour.load(position)
+        line_attribute1 = LineAttribute1.load(position)
+        brush_base_size = BrushBaseSize.load(position)
+        points = Points.load(position)
         return Line(
             brush_type, colour, line_attribute1, brush_base_size, points
         )
+
+    def dump(self):
+        """
+        """
+        raw_bytes = b''
+
+        raw_bytes += self.brush_type.dump()
+        raw_bytes += self.colour.dump()
+        raw_bytes += self.line_attribute1.dump()
+        raw_bytes += self.brush_base_size.dump()
+        raw_bytes += self.points.dump()
+
+        return raw_bytes
 
     def __str__(self):
         return u"brush={} colour={} base_size={} points={}".format(
@@ -209,6 +257,7 @@ class Line(Int32):
 class Lines(Int32):
     """
     """
+
     def __init__(self, count, lines):
         """
         """
@@ -216,9 +265,21 @@ class Lines(Int32):
         self.lines = lines
 
     @classmethod
-    def parse(cls, position):
+    def load(cls, position):
         """
         """
         count = position.send(cls)
-        lines = [Line.parse(position) for line in range(count)]
+        lines = [Line.load(position) for line in range(count)]
         return Lines(count, lines)
+
+    def dump(self):
+        """
+        """
+        raw_bytes = b''
+
+        count = Int32(len(self.lines))
+        raw_bytes += count.dump()
+        for line in self.lines:
+            raw_bytes += line.dump()
+
+        return raw_bytes

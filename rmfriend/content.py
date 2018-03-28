@@ -53,7 +53,7 @@ class Content(object):
         })
 
     @classmethod
-    def parse(cls, content):
+    def load(cls, content):
         """Return a Content instance for the given data.
 
         :param content: A string of JSON data.
@@ -91,4 +91,4 @@ class Content(object):
 
     def dump(self):
         """Return JSON string of the internal data we could write to disk."""
-        return json.dumps(self.data_)
+        return json.dumps(self.data_, indent=4)

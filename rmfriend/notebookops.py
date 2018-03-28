@@ -43,15 +43,15 @@ class NotebookOPS(object):
                 found_pages.append(page)
 
         document_id = str(uuid.uuid4())
-        meta_data = MetaData.new()
-        page_data = PageData.new()
+        metadata = MetaData.new()
+        pagedata = PageData.new()
         content = Content.new()
         lines = NotebookLines.new(pages=found_pages)
 
         return Notebook(
             document_id=document_id,
-            meta_data=meta_data,
-            page_data=page_data,
+            metadata=metadata,
+            pagedata=pagedata,
             content=content,
             lines=lines,
         )
