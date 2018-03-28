@@ -165,3 +165,39 @@ class Notebook(object):
                 filename.write_bytes(data[key])
             else:
                 filename.write_bytes(data[key].encode('utf-8'))
+
+    @classmethod
+    def read(cls, document_path, document_id):
+        """Read a notebook from disk.
+
+        :param document_path: The folder containing the notebook files.
+
+        :param document_id: The UUID string for the notebook.
+
+        This will attempt to read the files
+
+            <document_id>.(lines|metadata|content|pagedata)
+
+        The notebook directories (thumbnails and cache) will also be read.
+
+        :returns: A Notebook instance.
+
+        """
+        data = {}
+        document_path = pathlib.Path(document_path)
+
+        for key in ('lines', 'metadata', 'content', 'pagedata'):
+            filename = document_path / "{}.{}".format(document_id, key)
+            if key == 'lines':
+                data[key] = filename.read_bytes()
+            else:
+                data[key] = filename.read_bytes().decode('utf-8')
+
+        for key in ('thumbnails', 'cache'):
+            dirname = document_path / "{}.{}".format(document_id, key)
+            if dirname.is_dir():
+                data[key] = [item.name for item in dirname.iterdir()]
+
+        data['document_id'] = document_id
+
+        return cls.load(**data)

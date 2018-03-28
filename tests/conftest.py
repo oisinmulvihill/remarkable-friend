@@ -24,6 +24,16 @@ def logger(request):
     return log
 
 
+def examples_dir():
+    tests_dir = pathlib.Path(os.path.split(__file__)[0])
+    return str(tests_dir / 'examples')
+
+
+@pytest.fixture(scope='function')
+def examples_directory():
+    return examples_dir()
+
+
 def example_file(extension, open_as):
     """Recover the data the example files dependingon the extension.
 
@@ -33,10 +43,9 @@ def example_file(extension, open_as):
 
 
     """
-    tests_dir = os.path.split(__file__)[0]
     lines_file = os.path.join(
-        tests_dir,
-        'examples/b8c0aaa8-decb-4d39-9218-b66a7418aef9.{}'.format(extension)
+        examples_dir(),
+        'b8c0aaa8-decb-4d39-9218-b66a7418aef9.{}'.format(extension)
     )
     with open(lines_file, open_as) as fd:
         raw_binary = fd.read()

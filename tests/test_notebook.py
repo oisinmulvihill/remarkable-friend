@@ -211,3 +211,32 @@ def test_Notebook_thumnails_and_cache(logger, triangle_notebook):
     assert len(triangle.lines.pages) == 1
 
     assert triangle.last_opened_page == 0
+
+
+def test_Notebook_read_and_write(logger, examples_directory, tmpdir):
+    """
+    """
+    notebook = Notebook.read(
+        examples_directory, '0e7143f2-e82d-4402-8eb5-39811ddbb936'
+    )
+    assert notebook.name == 'triangle'
+    assert notebook.last_modified == '2018-03-10 13:50:22+Z'
+    assert len(notebook.pagedata.pages) == 0
+    assert notebook.lines.page_count == 1
+    assert len(notebook.lines.pages) == 1
+    assert notebook.last_opened_page == 0
+
+    # Now write a copy of this to the output directory:
+    output_dir = tmpdir.mkdir("output")
+    notebook.write(str(output_dir))
+
+    # Now read this new copy in again:
+    notebook_copy = Notebook.read(
+        output_dir, '0e7143f2-e82d-4402-8eb5-39811ddbb936'
+    )
+    assert notebook_copy.name == 'triangle'
+    assert notebook_copy.last_modified == '2018-03-10 13:50:22+Z'
+    assert len(notebook_copy.pagedata.pages) == 0
+    assert notebook_copy.lines.page_count == 1
+    assert len(notebook_copy.lines.pages) == 1
+    assert notebook_copy.last_opened_page == 0

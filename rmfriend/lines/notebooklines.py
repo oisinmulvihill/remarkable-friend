@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 """
-import os
 import struct
 
 from rmfriend.lines.base import Base
@@ -19,21 +18,32 @@ class FileHeader(Base):
     def __init__(self, header):
         """
         """
-        self.header = header.decode('ascii')
+        if isinstance(header, bytes):
+            self.header = header.decode('ascii')
+
+        else:
+            self.header = header
 
     def dump(self):
         """
         """
-        return struct.pack(self.fmt, bytes(self.header.encode()))
+        return struct.pack(self.fmt, bytes(self.header.encode('ascii')))
 
 
 class NotebookLines(Base):
-    """
+    """This represents the drawing data which resides in the notebook file with
+    the .lines extension.
+
+    From what I can see the drawing data is a bit like a binary SVG. Every
+    stroke and tool used is recorded in the order it happened. This means
+    rendering it would need to take account of the eraser tools for example.
+
     """
 
     def __init__(self, header, pages):
         """
         """
+        # A FileHeader instance
         self.file_header = header
         # A Pages instance
         self.pages_ = pages
@@ -51,28 +61,21 @@ class NotebookLines(Base):
         return self.pages_.count
 
     @classmethod
-    def read(cls, filename):
-        """
-        """
-        filename = os.path.expanduser(filename)
-        filename = os.path.abspath(filename)
-
-        with open(filename, 'rb') as fd:
-            raw_binary = fd.read()
-
-        return raw_binary
-
-    @classmethod
     def new(cls, pages=[]):
         """Returns and empty NotebookLines instance."""
         return cls(
-            header=FileHeader.EXPECTED,
+            header=FileHeader(FileHeader.EXPECTED),
             pages=Pages.new(pages=pages)
         )
 
     @classmethod
     def load(cls, raw_bytes):
-        """
+        """Convert the raw bytes in a NotebookLines instance.
+
+        :param raw_bytes: A bytes string.
+
+        The raw_bytes will usually have come from the <document_id>.lines file.
+
         """
         position = recover(raw_bytes)
 
@@ -94,12 +97,17 @@ class NotebookLines(Base):
         return notebook
 
     def dump(self):
-        """
+        """Convert this NotebookLines instance into raw_bytes.
+
+        This could then be written to the <document_id>.lines file.
+
+        :returns: A bytes string.
+
         """
         raw_bytes = b''
 
         # Add standard header
-        raw_bytes += FileHeader(self.file_header.encode('ascii')).dump()
+        raw_bytes += self.file_header.dump()
 
         # Dump out the rest of the notebook lines
         raw_bytes += self.pages_.dump()
