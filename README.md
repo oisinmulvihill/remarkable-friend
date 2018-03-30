@@ -1,8 +1,6 @@
-# reMarkable Friend
+# reMarkable Friend [![Build Status](https://travis-ci.org/oisinmulvihill/remarkable-friend.svg?branch=master)](https://travis-ci.org/oisinmulvihill/remarkable-friend)
 
 This allows the manipulation reMarkable notebooks on a desktop machine.
-
-[![Build Status](https://travis-ci.org/oisinmulvihill/remarkable-friend.svg?branch=master)](https://travis-ci.org/oisinmulvihill/remarkable-friend)
 
 ![listing notebooks](https://github.com/oisinmulvihill/rmfriend-releases/raw/master/image/listing-notebooks.gif "listing-notebooks.gif")
 
