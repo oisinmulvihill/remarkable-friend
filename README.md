@@ -2,8 +2,7 @@
 
 This allows the manipulation reMarkable notebooks on a desktop machine.
 
-.. image:: https://travis-ci.org/oisinmulvihill/remarkable-friend.svg?branch=master
-    :target: https://travis-ci.org/oisinmulvihill/remarkable-friend
+[![Build Status](https://travis-ci.org/oisinmulvihill/remarkable-friend.svg?branch=master)](https://travis-ci.org/oisinmulvihill/remarkable-friend)
 
 ![listing notebooks](https://github.com/oisinmulvihill/rmfriend-releases/raw/master/image/listing-notebooks.gif "listing-notebooks.gif")
 
