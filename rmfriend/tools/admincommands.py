@@ -17,6 +17,7 @@ from terminaltables import AsciiTable
 from rmfriend import userconfig
 from rmfriend.tools.sftp import SFTP
 from rmfriend.tools.sync import Sync
+from rmfriend.notebook import Notebook
 from rmfriend.lines.notebooklines import NotebookLines
 
 
@@ -225,3 +226,21 @@ class AdminCommands(cmdln.Cmdln):
 
         table = AsciiTable(listing)
         print(table.table)
+
+    def do_recover(self, subcmd, opts, document_id):
+        """${cmd_name}: Recover a specific notebook to the local cache.
+
+        The given document will be recovered regardless of whether the same
+        files already exist.
+
+        ${cmd_usage}
+        ${cmd_option_list}
+
+        """
+        config = userconfig.recover_or_create()
+        auth = dict(
+            hostname=config['rmfriend']['address'],
+            username=config['rmfriend']['username'],
+        )
+        with SFTP.connect(**auth) as sftp:
+            Notebook.recover(sftp, document_id)

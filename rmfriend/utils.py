@@ -1,7 +1,21 @@
 # -*- coding: utf-8 -*-
 """
 """
+import sys
 import pathlib
+
+
+def progress_factory(message):
+    """
+    """
+    def progress(position, total):
+        """
+        """
+        done = int((position / total) * 100)
+        sys.stdout.write('\r{}: {:2d}%'.format(message, done))
+        sys.stdout.flush()
+
+    return progress
 
 
 def document_id_and_extension(filename):

@@ -207,7 +207,7 @@ class SFTP(object):
             if extension not in ('lines', 'metadata', 'content'):
                 continue
 
-            md5sum = cls.remote_md5sum(ssh, remote_dir, item.filename)
+            md5sum = '' #cls.remote_md5sum(ssh, remote_dir, item.filename)
             progress_callback(total, progress)
             notebooks[document_id][extension] = {
                 'last_access': item.st_atime,
@@ -245,23 +245,26 @@ class SFTP(object):
         listing = []
 
         for document_id in notebooks:
-            # for extension in ('metadata', 'content'):
-            for extension in ('metadata',):
-                file_ = "{}.{}".format(document_id, extension)
-                print("file: {}".format(file_))
+            file_ = "{}.{}".format(document_id, 'metadata')
+            try:
                 data = cls.get(sftp, file_)
-                notebooks[document_id][extension] = json.loads(data)
 
-            metadata = notebooks[document_id]['metadata']
-            # Time in gmt hack really as its and epoch timestamp with timezone
-            last_modified = int(metadata['lastModified'][:-3])
-            last_modified = time.strftime(
-                '%Y-%m-%d %H:%M:%S', time.gmtime(last_modified)
-            )
-            listing.append({
-                'id': document_id,
-                'last_modified': last_modified,
-                'name': metadata['visibleName']
-            })
+            except IOError as error:
+                # print('Error reading {}: {}'.format(file_, error))
+                pass
+
+            else:
+                notebooks[document_id]['metadata'] = json.loads(data)
+
+                metadata = notebooks[document_id]['metadata']
+                last_modified = int(metadata['lastModified']) / 100
+                last_modified = time.strftime(
+                    '%Y-%m-%d %H:%M:%S', time.gmtime(last_modified)
+                )
+                listing.append({
+                    'id': document_id,
+                    'last_modified': last_modified,
+                    'name': metadata['visibleName']
+                })
 
         return listing

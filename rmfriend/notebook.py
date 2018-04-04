@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
 """
 """
+import os
 import uuid
-import pathlib
+from pathlib import Path
 
+from rmfriend import utils
+from rmfriend import userconfig
 from rmfriend.content import Content
+from rmfriend.tools.sftp import SFTP
 from rmfriend.pagedata import PageData
 from rmfriend.metadata import MetaData
+from rmfriend.utils import filename_from
 from rmfriend.lines.notebooklines import NotebookLines
 
 
@@ -148,7 +153,7 @@ class Notebook(object):
             <document_id>.(lines|metadata|content|pagedata)
 
         """
-        destination = pathlib.Path(destination_path)
+        destination = Path(destination_path)
 
         data = self.dump()
 
@@ -184,7 +189,7 @@ class Notebook(object):
 
         """
         data = {}
-        document_path = pathlib.Path(document_path)
+        document_path = Path(document_path)
 
         for key in ('lines', 'metadata', 'content', 'pagedata'):
             filename = document_path / "{}.{}".format(document_id, key)
@@ -201,3 +206,70 @@ class Notebook(object):
         data['document_id'] = document_id
 
         return cls.load(**data)
+
+    @classmethod
+    def recover(cls, sftp, document_id):
+        """Recover a remote notebook from reMarkable.
+
+        :param sftp: A connected paramiko SFTP instance.
+
+        This should have changed directory to the one containing the notebooks.
+
+        :param document_id: The UUID string for the notebook.
+
+        This will attempt to recover the files
+
+            <document_id>.(lines|metadata|content|pagedata)
+
+        The notebook directories (thumbnails and cache) will also be recovered.
+
+        :returns: A Notebook instance.
+
+        """
+        config = userconfig.recover_or_create()
+        cache_dir = Path(config['rmfriend']['cache_dir'])
+        address = config['rmfriend']['address']
+        username = config['rmfriend']['username']
+        auth = dict(
+            hostname=address,
+            username=username,
+        )
+
+        for extension in ('lines', 'metadata', 'content', 'pagedata'):
+            # Recover to the cache:
+            local_file = filename_from(document_id, extension, cache_dir)
+            remote_file = filename_from(document_id, extension)
+            try:
+                sftp.get(remote_file, localpath=local_file)
+            except IOError as error:
+                print('Error recovering {} to {}: {}'.format(
+                    remote_file,
+                    local_file,
+                    error
+                ))
+
+        def get_(remote_dir, remote_file, local_file, callback):
+            with SFTP.connect(**auth) as sftp:
+                sftp.chdir(remote_dir)
+                sftp.get(
+                    remote_file,
+                    localpath=local_file,
+                    callback=callback
+                )
+
+        for extension in ('thumbnails', 'cache'):
+            with SFTP.connect(**auth) as sftp:
+                name = filename_from(document_id, extension)
+                local_dir = Path(
+                    filename_from(document_id, extension, cache_dir)
+                )
+                dirname = cache_dir / name
+                if not dirname.is_dir():
+                    os.makedirs(dirname)
+                # Iterate through each image and recover it:
+                sftp.chdir(name)
+                for item in sftp.listdir_iter():
+                    progress_callback = utils.progress_factory(item.filename)
+                    local_file = str(local_dir / item.filename)
+                    remote_file = item.filename
+                    get_(name, remote_file, local_file, progress_callback)

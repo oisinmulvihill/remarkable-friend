@@ -15,6 +15,7 @@ from pathlib import Path
 from rmfriend import userconfig
 from rmfriend.export import svg
 from rmfriend.tools.sftp import SFTP
+from rmfriend.notebook import Notebook
 from rmfriend.utils import document_id_and_extension
 from rmfriend.lines.notebooklines import NotebookLines
 
@@ -170,39 +171,47 @@ class Sync(object):
 
         present_on_both = local.union(remote)
         changed_notebooks = []
-        for doc_id in present_on_both:
-            if doc_id not in remote_notebooks:
-                # only local, ignore.
-                continue
+        # for doc_id in present_on_both:
+        #     if doc_id not in remote_notebooks:
+        #         # only local, ignore.
+        #         continue
 
-            for extension in remote_notebooks[doc_id]:
-                if extension not in ('lines', 'metadata', 'content'):
-                    # ignore for the moment
-                    continue
-                remote_md5 = remote_notebooks[doc_id][extension]['md5sum']
-                if doc_id not in local_notebooks:
-                    # a new notebook skip, it will be handled later.
-                    continue
-                local_md5 = local_notebooks[doc_id][extension]['md5sum']
-                if local_md5 != remote_md5:
-                    changed_notebooks.append(doc_id)
+        #     for extension in remote_notebooks[doc_id]:
+        #         if extension not in ('lines', 'metadata', 'content'):
+        #             # ignore for the moment
+        #             continue
+        #         remote_md5 = remote_notebooks[doc_id][extension]['md5sum']
+        #         if doc_id not in local_notebooks:
+        #             # a new notebook skip, it will be handled later.
+        #             continue
+        #         local_md5 = local_notebooks[doc_id][extension]['md5sum']
+        #         if local_md5 != remote_md5:
+        #             changed_notebooks.append(doc_id)
 
-        recover_progress = progress_factory('Recovering changes')
-        auth['ssh_only'] = False
-        with SFTP.connect(**auth) as sftp:
-            SFTP.recover_notebooks(
-                sftp, cache_dir, remote_notebooks, changed_notebooks,
-                recover_progress
-            )
+        # recover_progress = progress_factory('Recovering changes')
+        # auth['ssh_only'] = False
+        # with SFTP.connect(**auth) as sftp:
+        #     SFTP.recover_notebooks(
+        #         sftp, cache_dir, remote_notebooks, changed_notebooks,
+        #         recover_progress
+        #     )
 
         recover_progress = progress_factory('Recovering new notebooks')
         only_remote = remote.difference(local)
         auth['ssh_only'] = False
         with SFTP.connect(**auth) as sftp:
-            SFTP.recover_notebooks(
-                sftp, cache_dir, remote_notebooks, list(only_remote),
-                recover_progress
-            )
+            progress = 1
+            ro = list(only_remote)
+            total = len(ro)
+            for document_id in ro:
+                Notebook.recover(sftp, document_id)
+                recover_progress(total, progress)
+                progress += 1
+
+            # SFTP.recover_notebooks(
+            #     sftp, cache_dir, remote_notebooks, list(only_remote),
+            #     recover_progress
+            # )
 
         returned = {
             'new': list(only_remote),
