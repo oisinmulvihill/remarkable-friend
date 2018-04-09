@@ -3,8 +3,6 @@
 This allows the manipulation reMarkable notebooks on a desktop machine. It also
 allows notebooks to be backed-up to your desktop computer.
 
-![listing notebooks](https://github.com/oisinmulvihill/rmfriend-releases/raw/master/image/listing-notebooks.gif "listing-notebooks.gif")
-
 # Table of contents
 1. [Development](#development)
 2. [Usage](#usage)
@@ -178,6 +176,11 @@ etc
 $
 
 ```
+
+Outdated video:
+
+![listing notebooks](https://github.com/oisinmulvihill/rmfriend-releases/raw/master/image/listing-notebooks.gif "listing-notebooks.gif")
+
 
 
 ## Convert a Notebook to SVG <a name="to_svg"></a>
