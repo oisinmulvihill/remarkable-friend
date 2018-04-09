@@ -134,8 +134,6 @@ You could backup your notebooks to Dropbox, Google Drive or any other cloud
 provider by changing the cache_dir configuration option. To do this edit the
 file `~/.rmfriend/config.cfg` and change `cache_dir`.
 
-```
-
 For example for Dropbox I would do:
 
 ```bash
