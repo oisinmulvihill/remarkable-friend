@@ -5,7 +5,6 @@ import os
 import uuid
 from pathlib import Path
 
-from rmfriend import utils
 from rmfriend import userconfig
 from rmfriend.content import Content
 from rmfriend.tools.sftp import SFTP
@@ -248,13 +247,12 @@ class Notebook(object):
                     error
                 ))
 
-        def get_(remote_dir, remote_file, local_file, callback):
+        def get_(remote_dir, remote_file, local_file):
             with SFTP.connect(**auth) as sftp:
                 sftp.chdir(remote_dir)
                 sftp.get(
                     remote_file,
                     localpath=local_file,
-                    callback=callback
                 )
 
         for extension in ('thumbnails', 'cache'):
@@ -269,7 +267,6 @@ class Notebook(object):
                 # Iterate through each image and recover it:
                 sftp.chdir(name)
                 for item in sftp.listdir_iter():
-                    progress_callback = utils.progress_factory(item.filename)
                     local_file = str(local_dir / item.filename)
                     remote_file = item.filename
-                    get_(name, remote_file, local_file, progress_callback)
+                    get_(name, remote_file, local_file)

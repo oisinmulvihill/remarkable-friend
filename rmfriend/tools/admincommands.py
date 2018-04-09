@@ -138,7 +138,7 @@ class AdminCommands(cmdln.Cmdln):
             listing = SFTP.notebook_ls(sftp, results)
 
         table_listing = [
-            ['Last Modified', 'Name']
+            ['Last Modified', 'Name', 'reMarkable Version', 'Local Version']
         ]
         if opts.show_id:
             table_listing[0].insert(0, 'ID')
@@ -146,12 +146,20 @@ class AdminCommands(cmdln.Cmdln):
         for e in listing:
             if opts.show_id:
                 table_listing.append((
-                    e['id'], e['last_modified'], e['name'])
+                    e['id'],
+                    e['last_modified'],
+                    e['name'],
+                    e['version'],
+                    e['local_version'] or '-'
+                )
                 )
             else:
                 table_listing.append((
-                    e['last_modified'], e['name'])
-                )
+                    e['last_modified'],
+                    e['name'],
+                    e['version'],
+                    e['local_version'] or '-'
+                ))
 
         table = AsciiTable(table_listing)
         print(table.table)
@@ -184,17 +192,16 @@ class AdminCommands(cmdln.Cmdln):
         notebooks = Sync.notebook_cache()
 
         listing = [
-            ('Last Access', 'Last Modified', 'Size', 'URL')
+            ('Name', 'Version', 'URI')
         ]
         for doc_id in notebooks:
             for ext in notebooks[doc_id]:
                 nb = notebooks[doc_id][ext]
                 listing.append(
                     (
-                        nb['last_access'],
-                        nb['last_modification'],
-                        nb['size'],
-                        nb['url'],
+                        nb['name'],
+                        nb['version'],
+                        nb['uri'],
                     )
                 )
 

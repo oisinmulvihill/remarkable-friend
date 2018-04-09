@@ -7,11 +7,10 @@ manipulation and to backup.
 import os
 import sys
 import json
-import hashlib
-import binascii
 import collections
 from pathlib import Path
 
+from rmfriend import utils
 from rmfriend import userconfig
 from rmfriend.export import svg
 from rmfriend.tools.sftp import SFTP
@@ -37,15 +36,18 @@ class Sync(object):
                 # Skip for the moment
                 continue
             doc_id, ext = document_id_and_extension(item.name)
-            md5sum = binascii.hexlify(
-                hashlib.md5(item.read_bytes()).digest()
-            )
-            status = item.lstat()
+            uri = item.as_uri()
+            version = '-'
+            name = '-'
+            if ext == 'metadata':
+                metadata = json.loads(item.read_bytes())
+                name = metadata['visibleName']
+                version = metadata['version']
+
             notebooks[doc_id][ext] = {
-                'last_access': int(status.st_atime),
-                'last_modification': int(status.st_mtime),
-                'size': status.st_size,
-                'md5sum': md5sum.decode(),
+                'uri': uri,
+                'version': version,
+                'name': name,
             }
 
         return dict(notebooks)
@@ -131,12 +133,9 @@ class Sync(object):
         config = userconfig.recover_or_create()
         address = config['rmfriend']['address']
         username = config['rmfriend']['username']
-        cache_dir = config['rmfriend']['cache_dir']
-        remote_dir = config['rmfriend']['remote_dir']
 
         local_notebooks = Sync.notebook_cache()
         local = set(local_notebooks.keys())
-        print("Local notebooks '{}'".format(len(local)))
 
         def progress_factory(message):
             def action_ticker(total, position):
@@ -148,70 +147,58 @@ class Sync(object):
 
             return action_ticker
 
-        calculation_progress = progress_factory('Calculating remote changes')
-
         auth = dict(
             hostname=address,
             username=username,
         )
         with SFTP.connect(**auth) as sftp:
-            remote_notebooks = SFTP.notebooks_from_listing(sftp.listdir())
-            auth['ssh_only'] = True
-            with SFTP.connect(**auth) as ssh:
-                SFTP.notebook_remote_status(
-                    sftp, ssh, remote_dir, remote_notebooks,
-                    calculation_progress
-                )
+            notebook_listing = SFTP.notebooks_from_listing(sftp.listdir())
+            remote_notebooks = {
+                nb['id']: nb
+                for nb in SFTP.notebook_ls(sftp, notebook_listing)
+            }
 
         remote = set(remote_notebooks.keys())
-        print("Notebooks present remotely: {}".format(len(remote)))
+        print("All notebooks on reMarkable: {}".format(len(remote)))
 
         only_local = local.difference(remote)
         print("Notebooks only present locally: {}".format(len(only_local)))
 
         present_on_both = local.union(remote)
-        changed_notebooks = []
-        # for doc_id in present_on_both:
-        #     if doc_id not in remote_notebooks:
-        #         # only local, ignore.
-        #         continue
+        print("Notebooks on both: {}".format(len(present_on_both)))
 
-        #     for extension in remote_notebooks[doc_id]:
-        #         if extension not in ('lines', 'metadata', 'content'):
-        #             # ignore for the moment
-        #             continue
-        #         remote_md5 = remote_notebooks[doc_id][extension]['md5sum']
-        #         if doc_id not in local_notebooks:
-        #             # a new notebook skip, it will be handled later.
-        #             continue
-        #         local_md5 = local_notebooks[doc_id][extension]['md5sum']
-        #         if local_md5 != remote_md5:
-        #             changed_notebooks.append(doc_id)
-
-        # recover_progress = progress_factory('Recovering changes')
-        # auth['ssh_only'] = False
-        # with SFTP.connect(**auth) as sftp:
-        #     SFTP.recover_notebooks(
-        #         sftp, cache_dir, remote_notebooks, changed_notebooks,
-        #         recover_progress
-        #     )
-
-        recover_progress = progress_factory('Recovering new notebooks')
         only_remote = remote.difference(local)
-        auth['ssh_only'] = False
+        print("Notebooks only on reMarkable: {}".format(len(only_remote)))
+
+        change_progress = utils.progress_factory('Working out changes')
+        changed_notebooks = []
         with SFTP.connect(**auth) as sftp:
             progress = 1
-            ro = list(only_remote)
-            total = len(ro)
-            for document_id in ro:
-                Notebook.recover(sftp, document_id)
-                recover_progress(total, progress)
+            total = len(list(present_on_both))
+            for doc_id in present_on_both:
+                change_progress(progress, total)
                 progress += 1
 
-            # SFTP.recover_notebooks(
-            #     sftp, cache_dir, remote_notebooks, list(only_remote),
-            #     recover_progress
-            # )
+                if doc_id not in remote_notebooks:
+                    # only local, ignore.
+                    continue
+
+                local_version = remote_notebooks[doc_id]['local_version']
+                remarkable_version = remote_notebooks[doc_id]['version']
+                if remarkable_version > local_version:
+                    Notebook.recover(sftp, doc_id)
+
+        recover_progress = utils.progress_factory('Recovering new notebooks')
+        auth['ssh_only'] = False
+        with SFTP.connect(**auth) as sftp:
+            # clear change progress update.
+            print('\n')
+            progress = 1
+            total = len(only_remote)
+            for document_id in only_remote:
+                Notebook.recover(sftp, document_id)
+                recover_progress(progress, total)
+                progress += 1
 
         returned = {
             'new': list(only_remote),

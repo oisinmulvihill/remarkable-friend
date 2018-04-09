@@ -1,12 +1,24 @@
 # reMarkable Friend [![Build Status](https://travis-ci.org/oisinmulvihill/remarkable-friend.svg?branch=master)](https://travis-ci.org/oisinmulvihill/remarkable-friend)
 
-This allows the manipulation reMarkable notebooks on a desktop machine.
+This allows the manipulation reMarkable notebooks on a desktop machine. It also
+allows notebooks to be backed-up to your desktop computer.
 
 ![listing notebooks](https://github.com/oisinmulvihill/rmfriend-releases/raw/master/image/listing-notebooks.gif "listing-notebooks.gif")
 
-For the GUI and MacOSX app see the frontend repository:
+# Table of contents
+1. [Development](#development)
+2. [Usage](#usage)
+    1. [reMarkable Sync](#rsync)
+        1. [Dropbox / Cloud Backup](#cloudbackup)
+    2. [Notebook listing](#ls)
+    3. [Notebook to SVG](#to_svg)
+    4. [Notebook to SVG](#to_png)
 
- - https://github.com/oisinmulvihill/remarkable-friend-ui
+# Development <a name="development"></a>
+
+## Updates
+
+Backing up notebooks
 
 I have successfully implemented copying pages from an existing notebook into a
 new one. Don't get too excited just yet, as I've only demonstrated this in my
@@ -38,7 +50,6 @@ the reMarkable lines file format.
 
  - https://plasma.ninja/blog/devices/remarkable/binary/format/2017/12/26/reMarkable-lines-file-format.html
 
-# Development
 
 I'm currently developing on MacOSX using Python 3 installed from home brew. I
 aim to produce stand alone program you can download for Mac, Linux and Windows
@@ -77,11 +88,74 @@ make test
 
 ```
 
+## UI
 
-## Usage
+For the GUI and MacOSX app see the frontend repository:
+
+ - https://github.com/oisinmulvihill/remarkable-friend-ui
 
 
-### List notebooks from the command line
+# Usage <a name="usage"></a>
+
+The following are the reMarkable Friend action which can be used from the
+command line.
+
+The first time command line `rmfriend` is run it creates a `.rmfriend`
+directory in your home. Inside the configuration file `config.cfg` is created
+along with the `notebooks` cache directory.
+
+## reMarkable Sync <a name="rsync"></a>
+
+This command will synchronise the notebooks with your desktop computer. For
+example:
+
+```bash
+
+$ rmfriend rsync
+All notebooks on reMarkable: 43
+Notebooks only present locally: 1
+Notebooks on both: 44
+Notebooks only on reMarkable: 0
+Working out changes: 100%
+
+$
+
+```
+
+The first time this will recover all the notebooks and make take some time. Later
+runs will be faster as only what has changed will be synchronised.
+
+If a notebook is deleted from reMarkable it will not be deleted locally. I
+favour this approach. I can restore a notebook if I want to.
+
+### Backup to Dropbox / Google Drive <a name="cloudbackup"></a>
+
+You could backup your notebooks to Dropbox, Google Drive or any other cloud
+provider by changing the cache_dir configuration option. To do this edit the
+file `~/.rmfriend/config.cfg` and change `cache_dir`.
+
+```
+
+For example for Dropbox I would do:
+
+```bash
+
+$ vi ~/.rmfriend/config.cfg
+
+[rmfriend]
+:
+cache_dir = /Users/oisin/Dropbox/notebooks
+:
+
+```
+
+Only one cache_dir is supported.
+
+## List notebooks <a name="ls"></a>
+
+This is used to see what notebooks are present on reMarkable. It also shows
+the latest version for each notebook. If the notebook is cached locally then
+the local version will be displayed as well.
 
 Using -p/--password will ask for the password to be entered in a secure way. You
 can use -a/--address to change where to connect. To see the raw document UUID
@@ -91,27 +165,24 @@ you can add --show-id.
 
 $rmfriend ls --password
 Please enter password for root@10.99.11.1:
-2018-03-13 21:34:11,796 connect INFO Connecting to device hostname '10.99.11.1' username 'root'
-2018-03-13 21:34:12,443 connect INFO Connected to device '10.99.11.1' changing to remote path '/home/root/.local/share/remarkable/xochitl'
-+---------------------+-------------------------------------+
-| Last Modified       | Name                                |
-+---------------------+-------------------------------------+
-| 2018-02-13 21:17:50 | Tech Dinner                         |
-| 2018-03-07 11:02:43 | Dev Process                         |
++---------------------+--------------------------------+--------------------+---------------+
+| Last Modified       | Name                           | reMarkable Version | Local Version |
++---------------------+--------------------------------+--------------------+---------------+
+| 2018-04-06 12:59:24 | Unmortgage                     | 28                 | 28            |
+| 2018-02-13 21:17:50 | Tech Dinner                    | 2                  | 2             |
 :
 etc
 :
-| 2018-02-20 17:15:45 | Notes From "The Managers Path"      |
-| 2018-03-08 09:22:56 | ForStandUp                          |
-|---------------------+-------------------------------------+
-2018-03-13 21:34:13,094 connect INFO Connection to device '10.99.11.1' closed.
+| 2018-03-11 12:16:54 | Asia 2018                      | 30                 | 30            |
+| 2018-03-02 14:29:40 | Research                       | 12                 | 12            |
++---------------------+--------------------------------+--------------------+---------------+
 
 $
 
 ```
 
 
-### Convert a Notebook to SVG
+## Convert a Notebook to SVG <a name="to_svg"></a>
 
 I've produced a very basic converter takes the path to a transferred notebook
 and the base output file name. Each page will be converted to its own SVG
@@ -132,7 +203,7 @@ $
 ```
 
 
-### Convert a Notebook to PNG
+## Convert a Notebook to PNG <a name="to_png"></a>
 
 This is a very rudimentary converter from lines format to PNG. It works but
 needs a lot more work.

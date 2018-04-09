@@ -6,10 +6,12 @@ import json
 import time
 import logging
 import collections
+from pathlib import Path
 from contextlib import contextmanager
 
 import paramiko
 
+from rmfriend import userconfig
 from rmfriend.utils import filename_from
 from rmfriend.utils import document_id_and_extension
 
@@ -107,9 +109,10 @@ class SFTP(object):
         for document_id in results:
             extensions = list(results[document_id].keys())
             if 'pdf' in extensions or 'epub' in extensions:
-                print("Ignoring '{}' as its not to be a notebook: {}".format(
-                    document_id, extensions,
-                ))
+                pass
+                # print("Ignoring '{}' as its not to be a notebook: {}".format(
+                #     document_id, extensions,
+                # ))
             else:
                 returned[document_id] = results[document_id]
 
@@ -158,65 +161,6 @@ class SFTP(object):
                 progress_callback(total, progress)
 
     @classmethod
-    def remote_md5sum(cls, ssh, remote_dir, filename):
-        """
-        """
-        remote_file = '{}/{}'.format(remote_dir, filename)
-        command = 'md5sum {}'.format(remote_file)
-        stdin, stdout, stderr = ssh.exec_command(command)
-        # split the md5sum line into sum and filename
-        #   2decad2252e3cd09fb2cfa19118b250b  \
-        #       93861cf6-dffc-45cd-ae02-25283e71c4db.content
-        # returning just 2decad2252e3cd09fb2cfa19118b250b
-        remote_md5 = stdout.read().decode().strip().split(' ')[0]
-        return remote_md5
-
-    @classmethod
-    def notebook_remote_status(
-        cls, sftp, ssh, remote_dir, notebooks, progress_callback
-    ):
-        """Update the notebooks give with filesystem information.
-
-        :param sftp: See connect() for details.
-
-        :param notebooks: See notebooks_from_listing().
-
-        The classmethod is used to recover the current filesystem status of
-        notebooks on the device. This will update each of the entries in the
-        notebooks dict with a status dict in the form::
-
-                {
-                    'last_access': <remote st_atime>,
-                    'last_modification': <remote st_mtime>,
-                    'size': <remote st_size>,
-                }
-
-        """
-        progress = 1
-        total = len(sftp.listdir_attr())
-        for item in sftp.listdir_attr():
-            (document_id, extension) = document_id_and_extension(
-                item.filename
-            )
-
-            progress += 1
-
-            if document_id not in notebooks:
-                continue
-
-            if extension not in ('lines', 'metadata', 'content'):
-                continue
-
-            md5sum = '' #cls.remote_md5sum(ssh, remote_dir, item.filename)
-            progress_callback(total, progress)
-            notebooks[document_id][extension] = {
-                'last_access': item.st_atime,
-                'last_modification': item.st_mtime,
-                'size': item.st_size,
-                'md5sum': md5sum,
-            }
-
-    @classmethod
     def notebook_ls(cls, sftp, notebooks):
         """Recover the metadata and print a listing of the notebooks.
 
@@ -232,6 +176,8 @@ class SFTP(object):
                 {
                     'id': 'UUID',
                     'name': 'notebook name',
+                    'version': '<reMarkable notebook version number>',
+                    'local_version': '<cached notebook version number>' or '',
                     'last_modified': 'iso8601 formatted string'
                 },
                 :
@@ -242,6 +188,9 @@ class SFTP(object):
         data.
 
         """
+        config = userconfig.recover_or_create()
+        cache_dir = Path(config['rmfriend']['cache_dir'])
+
         listing = []
 
         for document_id in notebooks:
@@ -249,22 +198,40 @@ class SFTP(object):
             try:
                 data = cls.get(sftp, file_)
 
-            except IOError as error:
+            except IOError as error:  # noqa
                 # print('Error reading {}: {}'.format(file_, error))
                 pass
 
             else:
                 notebooks[document_id]['metadata'] = json.loads(data)
 
+                # If there is a local version of this file check its version
+                local_version = 0
+                local_metadata = cache_dir / file_
+                if local_metadata.is_file():
+                    local_metadata = json.loads(local_metadata.read_bytes())
+                    local_version = int(local_metadata['version'])
+
                 metadata = notebooks[document_id]['metadata']
-                last_modified = int(metadata['lastModified']) / 100
+                last_modified = int(metadata['lastModified']) / 1000
                 last_modified = time.strftime(
                     '%Y-%m-%d %H:%M:%S', time.gmtime(last_modified)
                 )
-                listing.append({
-                    'id': document_id,
-                    'last_modified': last_modified,
-                    'name': metadata['visibleName']
-                })
+
+                if metadata['type'] == 'DocumentType':
+                    listing.append({
+                        'id': document_id,
+                        'name': metadata['visibleName'],
+                        'version': int(metadata['version']),
+                        'local_version': local_version,
+                        'last_modified': last_modified,
+                    })
+
+                else:
+                    # This could be a collection type, PDF, epub, etc.
+                    pass
+                    # print('Not a notebook: {} {}'.format(
+                    #     metadata['type'], metadata['visibleName']
+                    # ))
 
         return listing
