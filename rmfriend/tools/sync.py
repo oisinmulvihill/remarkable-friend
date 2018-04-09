@@ -4,19 +4,19 @@ Manages the synchronisation of notebooks to local desktop to speed up
 manipulation and to backup.
 
 """
-import os
 import sys
 import json
 import collections
 from pathlib import Path
 
+from natsort import natsorted, ns
+
 from rmfriend import utils
 from rmfriend import userconfig
-from rmfriend.export import svg
 from rmfriend.tools.sftp import SFTP
 from rmfriend.notebook import Notebook
+from rmfriend.utils import filename_from
 from rmfriend.utils import document_id_and_extension
-from rmfriend.lines.notebooklines import NotebookLines
 
 
 class Sync(object):
@@ -53,76 +53,56 @@ class Sync(object):
         return dict(notebooks)
 
     @classmethod
-    def generate_previews(cls):
-        """
-        """
-        config = userconfig.recover_or_create()
-        cache_dir = Path(config['rmfriend']['cache_dir'])
-        preview_dir = cache_dir / 'preview'
-        if not os.path.isdir(preview_dir):
-            os.makedirs(preview_dir)
-
-        def action_ticker(total, position):
-            done = int((position / total) * 100)
-            sys.stdout.write(
-                '\r{}: {:2d}%'.format('Preview generation', done)
-            )
-            sys.stdout.flush()
-
-        total = len(list(cache_dir.iterdir()))
-        progress = 0
-        for item in cache_dir.iterdir():
-            progress += 1
-            action_ticker(total, progress)
-            doc_id, ext = document_id_and_extension(item.name)
-            if ext != 'lines':
-                # Only generate previews for notebooks
-                continue
-
-            metadata = {}
-            metadata_file = cache_dir / "{}.metadata".format(doc_id)
-            if metadata_file.is_file():
-                try:
-                    metadata = json.loads(metadata_file.read_bytes())
-                except ValueError:
-                    pass
-            name = metadata.get('visibleName')
-            notebook = NotebookLines.parse(item.read_bytes())
-            image_filename = "{}-page".format(doc_id)
-            image_index = {'id': doc_id, 'name': name, 'pages': []}
-            index_filename = str(preview_dir / "{}.page_index".format(doc_id))
-            for file_ in svg.Export.convert(notebook, image_filename):
-                # index to easily get all notebook preview pages:
-                preview = str(preview_dir / file_['filename'])
-                with open(preview, 'wb') as fd:
-                    os.chdir(str(preview_dir))
-                    file_['image'].save()
-                image_index['pages'].append(preview)
-            with open(index_filename, 'wb') as fd:
-                fd.write(json.dumps(image_index).encode())
-
-    @classmethod
     def notebook_previews(cls):
         """
         """
         config = userconfig.recover_or_create()
         cache_dir = Path(config['rmfriend']['cache_dir'])
-        preview_dir = cache_dir / 'preview'
 
         found = []
         for item in cache_dir.iterdir():
-            doc_id, ext = document_id_and_extension(item.name)
-            if ext == 'lines':
-                # Is there a generated index?
-                index_filename = preview_dir / "{}.page_index".format(doc_id)
-                if index_filename.is_file():
-                    try:
-                        notebook = json.loads(index_filename.read_bytes())
-                    except ValueError:
-                        pass
+            document_id, ext = document_id_and_extension(item.name)
+            listing = {
+                "id": document_id,
+                "name": '',
+                "version": '',
+                "last_modified": '',
+                "last_opened": '',
+                "images": [],
+            }
+            if ext == 'thumbnails':
+                # recover metadata details:
+                name = filename_from(document_id, 'metadata')
+                metadata = cache_dir / name
+                metadata = json.loads(metadata.read_bytes())
+                listing['name'] = metadata['visibleName']
+                listing['version'] = metadata['version']
+                listing['last_modified'] = metadata['lastModified']
 
-                    else:
-                        found.append(notebook)
+                # Is the last opened page present?
+                name = filename_from(document_id, 'content')
+                content = cache_dir / name
+                if content.is_file():
+                    content = json.loads(content.read_bytes())
+                    if 'lastOpenedPage' in content:
+                        listing['last_opened'] = content['lastOpenedPage']
+
+                # find the thumbnail images:
+                name = filename_from(document_id, 'thumbnails')
+                thumbnails = cache_dir / name
+                for item in thumbnails.iterdir():
+                    listing['images'].append(item.name)
+                listing['images'] = natsorted(
+                    listing['images'], alg=ns.IGNORECASE
+                )
+                found.append(listing)
+
+        # Sort by last modified decending emulating reMarkable / Notebooks UI
+        found = sorted(
+            found,
+            key=lambda doc: doc['last_modified'],
+            reverse=True
+        )
 
         return found
 

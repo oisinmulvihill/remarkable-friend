@@ -173,15 +173,6 @@ class AdminCommands(cmdln.Cmdln):
         """
         Sync.rsync()
 
-    def do_generate_previews(self, subcmd, opts, *args, **kwargs):
-        """${cmd_name}: Generate the notebook file previews.
-
-        ${cmd_usage}
-        ${cmd_option_list}
-
-        """
-        Sync.generate_previews()
-
     def do_cache_status(self, subcmd, opts, *args, **kwargs):
         """${cmd_name}: Update the local cache with new & changed notebooks.
 
@@ -221,13 +212,15 @@ class AdminCommands(cmdln.Cmdln):
         notebooks = Sync.notebook_previews()
 
         listing = [
-            ('Name', 'Pages')
+            ('Name', 'Version', 'Last Opened Page', 'Images')
         ]
         for notebook in notebooks:
             listing.append(
                 (
                     notebook['name'],
-                    len(notebook['pages']),
+                    notebook['version'],
+                    notebook['last_opened'],
+                    len(notebook['images']),
                 )
             )
 
