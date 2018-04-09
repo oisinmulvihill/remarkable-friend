@@ -16,7 +16,8 @@ allows notebooks to be backed-up to your desktop computer.
 
 ## Updates
 
-Backing up notebooks
+Notebooks can now by backed-up to the desktop see [reMarkable Sync](#rsync) for
+more details.
 
 I have successfully implemented copying pages from an existing notebook into a
 new one. Don't get too excited just yet, as I've only demonstrated this in my
@@ -47,7 +48,6 @@ the reMarkable lines file format.
  - https://github.com/ax3l/lines-are-beautiful
 
  - https://plasma.ninja/blog/devices/remarkable/binary/format/2017/12/26/reMarkable-lines-file-format.html
-
 
 I'm currently developing on MacOSX using Python 3 installed from home brew. I
 aim to produce stand alone program you can download for Mac, Linux and Windows
@@ -180,7 +180,6 @@ $
 Outdated video:
 
 ![listing notebooks](https://github.com/oisinmulvihill/rmfriend-releases/raw/master/image/listing-notebooks.gif "listing-notebooks.gif")
-
 
 
 ## Convert a Notebook to SVG <a name="to_svg"></a>
