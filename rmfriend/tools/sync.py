@@ -121,7 +121,7 @@ class Sync(object):
             def action_ticker(total, position):
                 done = int((position / total) * 100)
                 sys.stdout.write(
-                    '\r{}: {:2d}%'.format(message, done)
+                    '\r{}: {:2d}% '.format(message, done)
                 )
                 sys.stdout.flush()
 
@@ -166,13 +166,17 @@ class Sync(object):
                 local_version = remote_notebooks[doc_id]['local_version']
                 remarkable_version = remote_notebooks[doc_id]['version']
                 if remarkable_version > local_version:
+                    print(
+                        "Recovering doc_id: ", doc_id, " local_version: ",
+                        local_version, " remarkable_version: ",
+                        remarkable_version
+                    )
                     Notebook.recover(sftp, doc_id)
 
         recover_progress = utils.progress_factory('Recovering new notebooks')
         auth['ssh_only'] = False
         with SFTP.connect(**auth) as sftp:
             # clear change progress update.
-            print('\n')
             progress = 1
             total = len(only_remote)
             for document_id in only_remote:
@@ -185,5 +189,7 @@ class Sync(object):
             'deleted': list(only_local),
             'changed': list(changed_notebooks),
         }
+
+        print("\nDone")
 
         return returned

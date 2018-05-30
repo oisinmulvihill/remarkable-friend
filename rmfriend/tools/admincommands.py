@@ -150,7 +150,7 @@ class AdminCommands(cmdln.Cmdln):
                     e['last_modified'],
                     e['name'],
                     e['version'],
-                    e['local_version'] or '-'
+                    e['local_version']
                 )
                 )
             else:
@@ -158,7 +158,7 @@ class AdminCommands(cmdln.Cmdln):
                     e['last_modified'],
                     e['name'],
                     e['version'],
-                    e['local_version'] or '-'
+                    e['local_version']
                 ))
 
         table = AsciiTable(table_listing)
